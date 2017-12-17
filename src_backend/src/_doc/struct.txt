@@ -1,0 +1,11 @@
+
+head
+    12_data1
+    13_data2
+    14_data3
+
+data
+    aac
+        a12
+            aaca121111 -> jakis plik
+

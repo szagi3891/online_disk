@@ -1,8 +1,11 @@
+extern crate crypto;
+
 use std::env;
 
 mod blob;
+mod utils;
 
-use blob::BlobKeyValue;
+//use blob::BlobKeyValue;
 
 /*
 użycie haszowania dla pliku ...
@@ -18,7 +21,7 @@ fn main() {
     if let Some(arg1) = env::args().nth(1) {
         println!("The first argument is {}", &arg1);
 
-        let key_value_manager = BlobKeyValue::new(arg1);
+        //let key_value_manager = BlobKeyValue::new(arg1);
 
     } else {
         panic!("Brak parametru");       //TODO

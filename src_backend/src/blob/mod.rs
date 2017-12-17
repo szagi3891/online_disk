@@ -1,3 +1,5 @@
+mod types;
 mod key_value;
+mod fs;
+mod fs_mock;
 
-pub use self::key_value::BlobKeyValue;
