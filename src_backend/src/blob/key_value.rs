@@ -31,6 +31,8 @@ impl<T> BlobKeyValue<T> where T : Fs {
         let hash = Hash::new(hash_bin);
         let file_path = create_file_path(&self.data_path, &hash);
 
+        println!("save {:?}", file_path.as_path());
+
         self.fs.save_file(file_path.as_path(), content.as_slice()).unwrap();
     }
 
