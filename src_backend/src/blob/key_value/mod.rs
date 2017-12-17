@@ -23,33 +23,18 @@ impl<T> BlobKeyValue<T> where T : Fs {
         }
     }
 
-    pub fn set_blob(&self, content: Vec<u8>) {
+    pub fn set_blob(&mut self, content: Vec<u8>) {
         let mut hasher = Sha1::new();
 
         hasher.input(content.as_slice());
         
         let hex = hasher.result_str();
-        
+
         let hash_bin = convert_from_hex(hex.as_bytes());
-        
         let hash = Hash::new(hash_bin);
+        let file_path = create_file_path(&self.data_path, &hash);
 
-        let (prefix1, prefix2) = extract_prefix_hash(&hash);
-
-        /*
-        let hash_string = hash.to_hex();
-        
-        let mut file_path = self.data_path;
-        file_path.push(hash_string.as_slice()[0, 2]);
-        file_path.push(hash_string[2, 5]);
-        */
-
-        //zbuduj ścieżkę
-        //w tą ścieżkę zapisz bufor
-
-        //hash
-
-        panic!("stop");
+        self.fs.save_file(file_path.as_path(), content.as_slice()).unwrap();
     }
 
     pub fn get_blob(&self, hash: &Hash) -> Vec<u8> {
@@ -59,6 +44,33 @@ impl<T> BlobKeyValue<T> where T : Fs {
     pub fn get_fs(self) -> T {
         self.fs
     }
+}
+
+fn create_file_path(data_path: &PathBuf, hash: &Hash) -> PathBuf {
+    let (prefix1, prefix2) = extract_prefix_hash(&hash);
+    let mut data_path = data_path.clone();
+    data_path.push(prefix1);
+    data_path.push(prefix2);
+    data_path.push(hash.to_hex());
+    data_path
+}
+
+#[test]
+fn test_for_create_file_path() {
+    let path = PathBuf::from("/aaa/bbb");
+    let hash = Hash::new([12, 33, 44, 120, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let out_path = create_file_path(&path, &hash);
+
+    assert_eq!(out_path.to_str().unwrap(), "/aaa/bbb/0c2/12c/0c212c781e000000000000000000000000000000");
+}
+
+#[test]
+fn test_for_create_file_path2() {
+    let path = PathBuf::from("/aaa/bbb");
+    let hash = Hash::new([99, 88, 250, 120, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let out_path = create_file_path(&path, &hash);
+
+    assert_eq!(out_path.to_str().unwrap(), "/aaa/bbb/635/8fa/6358fa781e000000000000000000000000000000");
 }
 
 fn extract_prefix_hash(hash: &Hash) -> (String, String) {

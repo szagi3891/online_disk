@@ -3,15 +3,15 @@ use blob::fs_mock::FsMock;
 
 #[test]
 fn exploration() {
-    let mut blob_key_value = BlobKeyValue::new("Path/Root".to_string(), FsMock{});
+    let mut blob_key_value = BlobKeyValue::new(
+        "Path/Root".to_string(),
+        FsMock::new()
+    );
 
-    //porównaj dump z tym oczekiwanym
+    blob_key_value.set_blob(Vec::from("dasdasda"));
 
-    //blob_key_value.get_fs() --> porównaj assercją z oczekiwanymi danymi
-
-    let blob1 = "dasdasda";
-    blob_key_value.set_blob(Vec::from(blob1));
-
-    //blob_key_value.get_fs() ---> dump z operacji porównać z założonym dumpem
-    //todo -- 
+    assert_eq!(
+        blob_key_value.get_fs().get_log(),
+        vec!("save_file Path/Root/d76/9ab/d769abe7ca1d27e4129d5fd5ce137324df12dec2 6461736461736461".to_string())
+    );
 }
