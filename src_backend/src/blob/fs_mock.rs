@@ -21,7 +21,14 @@ impl FsMock {
 
 impl Fs for FsMock {
     fn get_file(&mut self, path: &Path) -> Option<Vec<u8>> {
-        panic!("TODO 111");
+        self.data.push(
+            format!(
+                "get_file {}",
+                path.to_str().unwrap()
+            )
+        );
+
+        Some(Vec::new())
     }
 
     fn save_file(&mut self, path: &Path, content: &[u8]) -> Result<()> {

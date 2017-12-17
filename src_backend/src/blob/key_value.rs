@@ -7,9 +7,6 @@ use blob::types::Fs;
 use utils::hash::Hash;
 use utils::hex::{convert_from_hex};
 
-#[cfg(test)]
-mod test;
-
 pub struct BlobKeyValue<T> where T: Fs {
     data_path: PathBuf,
     fs: T,
@@ -37,8 +34,9 @@ impl<T> BlobKeyValue<T> where T : Fs {
         self.fs.save_file(file_path.as_path(), content.as_slice()).unwrap();
     }
 
-    pub fn get_blob(&self, hash: &Hash) -> Vec<u8> {
-        panic!("TODO");
+    pub fn get_blob(&mut self, hash: &Hash) -> Option<Vec<u8>> {
+        let file_path = create_file_path(&self.data_path, &hash);
+        self.fs.get_file(file_path.as_path())
     }
 
     pub fn get_fs(self) -> T {
@@ -108,3 +106,45 @@ fn to_hex_u16(input: u16) -> String {
     out
 }
 
+#[test]
+fn test_save_blob() {
+    use blob::key_value::BlobKeyValue;
+    use blob::fs_mock::FsMock;
+
+    let mut blob_key_value = BlobKeyValue::new(
+        "Path/Root".to_string(),
+        FsMock::new()
+    );
+
+    blob_key_value.set_blob(Vec::from("dasdasda"));
+
+    assert_eq!(
+        blob_key_value.get_fs().get_log(),
+        vec!("save_file Path/Root/d76/9ab/d769abe7ca1d27e4129d5fd5ce137324df12dec2 6461736461736461".to_string())
+    );
+}
+
+#[test]
+fn test_get_blob() {
+    use blob::key_value::BlobKeyValue;
+    use blob::fs_mock::FsMock;
+
+    let mut blob_key_value = BlobKeyValue::new(
+        "Path/Root".to_string(),
+        FsMock::new()
+    );
+
+    blob_key_value.get_blob(
+        &Hash::new([
+            0xd7, 0x69, 0xab, 0xe7, 0xca,
+            0x1d, 0x27, 0xe4, 0x12, 0x9d,
+            0x5f, 0xd5, 0xce, 0x13, 0x73,
+            0x24, 0xdf, 0x12, 0xde, 0xc2
+        ])
+    );
+
+    assert_eq!(
+        blob_key_value.get_fs().get_log(),
+        vec!("get_file Path/Root/d76/9ab/d769abe7ca1d27e4129d5fd5ce137324df12dec2".to_string())
+    );
+}
