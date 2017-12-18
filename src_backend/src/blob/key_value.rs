@@ -20,7 +20,7 @@ impl<T> BlobKeyValue<T> where T : Fs {
         }
     }
 
-    pub fn set_blob(&self, content: Vec<u8>) {
+    pub fn set_blob(&self, content: Vec<u8>) -> Hash {
         let mut hasher = Sha1::new();
 
         hasher.input(content.as_slice());
@@ -34,6 +34,8 @@ impl<T> BlobKeyValue<T> where T : Fs {
         println!("save {:?}", file_path.as_path());
 
         self.fs.save_file(file_path.as_path(), content.as_slice()).unwrap();
+
+        hash
     }
 
     pub fn get_blob(&self, hash: &Hash) -> Option<Vec<u8>> {
