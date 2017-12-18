@@ -20,7 +20,7 @@ impl<T> BlobKeyValue<T> where T : Fs {
         }
     }
 
-    pub fn set_blob(&mut self, content: Vec<u8>) {
+    pub fn set_blob(&self, content: Vec<u8>) {
         let mut hasher = Sha1::new();
 
         hasher.input(content.as_slice());
@@ -36,7 +36,7 @@ impl<T> BlobKeyValue<T> where T : Fs {
         self.fs.save_file(file_path.as_path(), content.as_slice()).unwrap();
     }
 
-    pub fn get_blob(&mut self, hash: &Hash) -> Option<Vec<u8>> {
+    pub fn get_blob(&self, hash: &Hash) -> Option<Vec<u8>> {
         let file_path = create_file_path(&self.data_path, &hash);
         self.fs.get_file(file_path.as_path())
     }
@@ -113,7 +113,7 @@ fn test_save_blob() {
     use blob::key_value::BlobKeyValue;
     use blob::fs_mock::FsMock;
 
-    let mut blob_key_value = BlobKeyValue::new(
+    let blob_key_value = BlobKeyValue::new(
         "Path/Root".to_string(),
         FsMock::new()
     );
@@ -131,7 +131,7 @@ fn test_get_blob() {
     use blob::key_value::BlobKeyValue;
     use blob::fs_mock::FsMock;
 
-    let mut blob_key_value = BlobKeyValue::new(
+    let blob_key_value = BlobKeyValue::new(
         "Path/Root".to_string(),
         FsMock::new()
     );

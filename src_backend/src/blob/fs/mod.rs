@@ -9,11 +9,11 @@ pub struct FsIo {
 }
 
 impl Fs for FsIo {
-    fn get_file(&mut self, path: &Path) -> Option<Vec<u8>> {
+    fn get_file(&self, path: &Path) -> Option<Vec<u8>> {
         get_file::get_file(path)
     }
 
-    fn save_file(&mut self, path: &Path, content: &[u8]) -> Result<()> {
+    fn save_file(&self, path: &Path, content: &[u8]) -> Result<()> {
         save_file::save_file(path, content)
     }
 }

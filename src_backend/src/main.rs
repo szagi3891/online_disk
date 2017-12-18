@@ -25,7 +25,7 @@ fn main() {
         use blob::fs::FsIo;
         use utils::hash::Hash;
 
-        let mut key_value_manager = BlobKeyValue::new(root_path, FsIo{});
+        let key_value_manager = BlobKeyValue::new(root_path, FsIo{});
 
         /*
         key_value_manager.set_blob("dasdas1".to_string().into_bytes());
@@ -33,12 +33,20 @@ fn main() {
         key_value_manager.set_blob("dasdas3".to_string().into_bytes());
         */
 
-        println!("AA {:?}", key_value_manager.get_blob(&Hash::new([
-            0xb1, 0x44, 0xfd, 0x13, 0xec,
-            0xad, 0x26, 0x5c, 0x46, 0xca,
-            0x65, 0x24, 0xaf, 0xc7, 0x50,
-            0x39, 0xf4, 0x25, 0x01, 0xa2,
-        ])).unwrap());
+        /*
+        println!(
+            "AA {:?}",
+            key_value_manager.get_blob(&Hash::new([
+                0xb1, 0x44, 0xfd, 0x13, 0xec,
+                0xad, 0x26, 0x5c, 0x46, 0xca,
+                0x65, 0x24, 0xaf, 0xc7, 0x50,
+                0x39, 0xf4, 0x25, 0x01, 0xa2,
+            ]))
+            .unwrap()
+        );
+        */
+
+        key_value_manager.set_blob("111 dasdas3 dsdasdasd asdasd asdasdas dasdas dasdasd sadasdas dasdasd adasdas dasdas".to_string().into_bytes());
 
     } else {
         panic!("Brak parametru");       //TODO
