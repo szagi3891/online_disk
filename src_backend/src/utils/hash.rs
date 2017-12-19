@@ -65,4 +65,29 @@ impl Hash {
             out.push(*item);
         }
     }
+
+    pub fn from_string(data: &str) -> Hash {
+        let bytes = data.as_bytes();
+        
+        assert_eq!(bytes.len(), 40);
+
+        let mut out = [
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+        ];
+
+        use std::str;
+
+        let mut index = 0;
+
+        for chank in bytes.chunks(2) {
+            let chunk_str = str::from_utf8(chank).unwrap();
+            out[index] = u8::from_str_radix(chunk_str, 16).unwrap();
+            index = index + 1;
+        }
+
+        Hash::new(out)
+    }
 }

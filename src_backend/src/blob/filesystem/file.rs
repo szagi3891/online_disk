@@ -2,4 +2,4 @@ pub struct FileSystemFile {
     files: Vec<u8>,
 }
 
-//00 --- plik
+const CodeFormat: u8 = 100;       //'d'

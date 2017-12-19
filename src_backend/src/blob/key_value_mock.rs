@@ -13,6 +13,7 @@ impl KeyValue for BlobKeyValue {
     fn set_blob(&self, content: Vec<u8>) -> Hash {
         let hash = hash_by_content(&content);
         assert_eq!(self.data.borrow_mut().insert(hash.clone(), content), None);
+        println!("set_blob by {}", hash.to_hex());
         hash
     }
 

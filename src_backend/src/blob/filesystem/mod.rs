@@ -1,8 +1,11 @@
 use blob::types::KeyValue;
 use utils::hash::Hash;
+use std::collections::HashMap;
 
 mod dir;
 mod file;
+
+use self::dir::FileSystemDir;
 
 pub struct FileSystem<T: KeyValue> {
     key_value: T,
@@ -22,7 +25,17 @@ impl<T: KeyValue> FileSystem<T> {
             
             if body.len() == 0 {
                 let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
-                let node_dir = dir::FileSystemDir::from_blob(&node_content);
+                let node_dir = FileSystemDir::from_blob(&node_content);
+
+                /*
+                    node_dir --- czy ten node zgadza się z haszem docelowego noda --- ?
+
+                    cała funkcja powinna zwracać typ Option<Hash>
+
+
+
+                    dodać drugi przypadek testowy, w którym docelowy hasz się niezgadza
+                */
 
                 panic!("TODO - do doimplementowania");
 
@@ -49,17 +62,23 @@ fn test_update() {
 
     let key_value_mock = BlobKeyValue::new();
 
-    //TODO - napchaj mocka testowymi danymi
-    //key_value_mock.set_blob();
+    key_value_mock.set_blob({
+        let dir = FileSystemDir::new_for_test({
+            let mut map = HashMap::new();
+            map.insert("hhh".to_string(), Hash::new_for_test(3));
+            map
+        });
+
+        dir.to_blob()
+    });
 
     let fs = FileSystem::new(key_value_mock);
 
-    //1 to katalog { hhh : 2 }
-    //1 [hhh] 2 3 ---> ma wygenerować nowego hasha
-
     let result = fs.update(
-        Hash::new_for_test(0x01),
+        Hash::from_string("f7affcfe684aad73ab0ad3fedb2b528da33b3022"),
         (vec!("hhh".to_string()), Hash::new_for_test(0x02)),
-        Hash::new_for_test(0x03)
+        Hash::new_for_test(0x03)                                //nowa wartość
     );
+
+    panic!("TODO - trzeba porównać wyniki z oczekiwanymi wartościami");
 }
