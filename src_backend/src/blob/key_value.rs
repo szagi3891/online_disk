@@ -1,11 +1,9 @@
 use std::path::PathBuf;
-use crypto::sha1::Sha1;
-use crypto::digest::Digest;
 use std::fmt::Write;
 
+use utils::hash_by_content::hash_by_content;
 use blob::types::Fs;
 use utils::hash::Hash;
-use utils::hex::{convert_from_hex};
 
 pub struct BlobKeyValue<T> where T: Fs {
     data_path: PathBuf,
@@ -21,17 +19,8 @@ impl<T> BlobKeyValue<T> where T : Fs {
     }
 
     pub fn set_blob(&self, content: Vec<u8>) -> Hash {
-        let mut hasher = Sha1::new();
-
-        hasher.input(content.as_slice());
-        
-        let hex = hasher.result_str();
-
-        let hash_bin = convert_from_hex(hex.as_bytes());
-        let hash = Hash::new(hash_bin);
+        let hash = hash_by_content(&content);
         let file_path = create_file_path(&self.data_path, &hash);
-
-        println!("save {:?}", file_path.as_path());
 
         self.fs.save_file(file_path.as_path(), content.as_slice()).unwrap();
 

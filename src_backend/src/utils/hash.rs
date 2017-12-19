@@ -2,10 +2,12 @@ use std::path::PathBuf;
 
 use utils::hex::to_hex;
 
-#[derive(Clone)]
+#[derive(PartialEq, Hash, Clone, Serialize, Deserialize, Debug)]
 pub struct Hash {
     hash: [u8; 20],
 }
+
+impl Eq for Hash {}
 
 impl Hash {
     pub fn new(hash: [u8; 20]) -> Hash {
@@ -14,6 +16,17 @@ impl Hash {
             hash: hash
         }
     }
+
+    #[test]
+    pub fn new_for_test(test_num: u8) -> Hash {
+        Hash::new([
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, test_num
+        ])
+    }
+
                                                                 //TODO zmienić potem nazwę na from_bytes
     pub fn from_bytes(hash: &[u8]) -> Hash {
         

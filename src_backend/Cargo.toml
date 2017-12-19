@@ -5,3 +5,6 @@ authors = ["Grzegorz Szeliga <szeligagrzegorz@gmail.com>"]
 
 [dependencies]
 rust-crypto = "0.2.36"
+serde = "1.0.21"
+serde_json = "1.0.6"
+serde_derive = "1.0.21"
