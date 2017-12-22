@@ -35,7 +35,7 @@ impl Hash {
         }
         
         let mut out = [0; 20];
-        out.copy_from_slice(&hash);
+        out.copy_from_slice(hash);
         
         Hash {
             hash: out
@@ -61,7 +61,7 @@ impl Hash {
 
                                                 //TODO - zmienić potem znowu na seiralize
     pub fn serialize(&self, out: &mut Vec<u8>) {
-        for item in self.hash.iter() {
+        for item in &self.hash {
             out.push(*item);
         }
     }
@@ -80,12 +80,9 @@ impl Hash {
 
         use std::str;
 
-        let mut index = 0;
-
-        for chank in bytes.chunks(2) {
-            let chunk_str = str::from_utf8(chank).unwrap();
+        for (index, item) in bytes.chunks(2).enumerate() {
+            let chunk_str = str::from_utf8(item).unwrap();
             out[index] = u8::from_str_radix(chunk_str, 16).unwrap();
-            index = index + 1;
         }
 
         Hash::new(out)

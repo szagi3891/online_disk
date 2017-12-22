@@ -23,7 +23,7 @@ impl<T: KeyValue> FileSystem<T> {
 
         if let Some((target_path_head, target_path_body)) = target_path.split_first() {
             
-            if target_path_body.len() == 0 {
+            if target_path_body.is_empty() {
                 let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
                 let mut node_dir = FileSystemDir::from_blob(&node_content);
 

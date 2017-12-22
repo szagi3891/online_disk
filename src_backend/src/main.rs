@@ -50,7 +50,7 @@ fn main() {
         );
         */
 
-        key_value_manager.set_blob("111 dasdas3 dsdasdasd asdasd asdasdas dasdas dasdasd sadasdas dasdasd adasdas dasdas".to_string().into_bytes());
+        key_value_manager.set_blob(&"111 dasdas3 dsdasdasd asdasd asdasdas dasdas dasdasd sadasdas dasdasd adasdas dasdas".to_string().into_bytes());
 
     } else {
         panic!("Brak parametru");       //TODO

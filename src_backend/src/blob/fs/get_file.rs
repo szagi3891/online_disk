@@ -15,7 +15,7 @@ pub fn get_file(path: &Path) -> Option<Vec<u8>> {
             match file.read_to_end(&mut buf) {
 
                 Ok(_) => {
-                    return Some(buf);
+                    Some(buf)
                 },
 
                 Err(err) => {
@@ -29,7 +29,7 @@ pub fn get_file(path: &Path) -> Option<Vec<u8>> {
             match err.kind() {
                 
                 ErrorKind::NotFound => {
-                    return None;
+                    None
                 }
                 
                 _ => {

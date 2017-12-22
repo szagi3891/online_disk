@@ -18,17 +18,17 @@ impl<T> BlobKeyValue<T> where T : Fs {
         }
     }
 
-    pub fn set_blob(&self, content: Vec<u8>) -> Hash {
-        let hash = hash_by_content(&content);
+    pub fn set_blob(&self, content: &[u8]) -> Hash {
+        let hash = hash_by_content(content);
         let file_path = create_file_path(&self.data_path, &hash);
 
-        self.fs.save_file(file_path.as_path(), content.as_slice()).unwrap();
+        self.fs.save_file(file_path.as_path(), content).unwrap();
 
         hash
     }
 
     pub fn get_blob(&self, hash: &Hash) -> Option<Vec<u8>> {
-        let file_path = create_file_path(&self.data_path, &hash);
+        let file_path = create_file_path(&self.data_path, hash);
         self.fs.get_file(file_path.as_path())
     }
 
@@ -38,7 +38,7 @@ impl<T> BlobKeyValue<T> where T : Fs {
 }
 
 fn create_file_path(data_path: &PathBuf, hash: &Hash) -> PathBuf {
-    let (prefix1, prefix2) = extract_prefix_hash(&hash);
+    let (prefix1, prefix2) = extract_prefix_hash(hash);
     let mut data_path = data_path.clone();
     data_path.push(prefix1);
     data_path.push(prefix2);
@@ -65,9 +65,9 @@ fn test_for_create_file_path2() {
 }
 
 fn extract_prefix_hash(hash: &Hash) -> (String, String) {
-    let prefix_byte0 = hash.get_prefix(0) as u16;
-    let prefix_byte1 = hash.get_prefix(1) as u16;
-    let prefix_byte2 = hash.get_prefix(2) as u16;
+    let prefix_byte0 = u16::from(hash.get_prefix(0));
+    let prefix_byte1 = u16::from(hash.get_prefix(1));
+    let prefix_byte2 = u16::from(hash.get_prefix(2));
 
     let prefix1: u16 = prefix_byte0 << 4 | ((prefix_byte1 & 0xf0) >> 4);
     let prefix2: u16 = ((prefix_byte1 & 0x0f) << 8) | prefix_byte2;
@@ -109,7 +109,7 @@ fn test_save_blob() {
         FsMock::new()
     );
 
-    blob_key_value.set_blob(Vec::from("dasdasda"));
+    blob_key_value.set_blob(&Vec::from("dasdasda"));
 
     assert_eq!(
         blob_key_value.get_fs().get_log(),

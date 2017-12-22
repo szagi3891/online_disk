@@ -3,7 +3,7 @@ use serde_json;
 
 use utils::hash::Hash;
 
-const CodeFormat: u8 = 102;       //'f'
+const CODE_FORMAT: u8 = 102;       //'f'
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FileSystemDir {
@@ -18,10 +18,10 @@ impl FileSystemDir {
         }
     }
 
-    pub fn from_blob(content: &Vec<u8>) -> FileSystemDir {
+    pub fn from_blob(content: &[u8]) -> FileSystemDir {
 
         if let Some((head, body)) = content.split_first() {
-            assert_eq!(*head, CodeFormat);
+            assert_eq!(*head, CODE_FORMAT);
 
             let files: HashMap<String, Hash> = serde_json::from_slice(body).unwrap();
 
@@ -35,7 +35,7 @@ impl FileSystemDir {
 
     pub fn to_blob(&self) -> Vec<u8> {
         let mut json = serde_json::to_vec(&self.files).unwrap();
-        let mut out = vec!(CodeFormat);
+        let mut out = vec!(CODE_FORMAT);
         out.append(&mut json);
         out
     }

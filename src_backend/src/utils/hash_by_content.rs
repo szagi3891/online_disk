@@ -4,10 +4,10 @@ use crypto::digest::Digest;
 use utils::hex::{convert_from_hex};
 use utils::hash::Hash;
 
-pub fn hash_by_content(content: &Vec<u8>) -> Hash {
+pub fn hash_by_content(content: &[u8]) -> Hash {
     let mut hasher = Sha1::new();
 
-    hasher.input(content.as_slice());
+    hasher.input(content);
     
     let hex = hasher.result_str();
 
