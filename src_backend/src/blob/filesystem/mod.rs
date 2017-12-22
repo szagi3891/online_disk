@@ -7,6 +7,17 @@ mod file;
 
 use self::dir::FileSystemDir;
 
+fn head_vec<T>(list: &mut Vec<T>) -> Option<T> {
+    if list.len() < 1 {
+        return None
+    }
+
+    let body = list.split_off(1);
+    let head = list.pop();
+    *list = body;
+    head
+}
+
 pub struct FileSystem<T: KeyValue> {
     key_value: T,
 }
@@ -18,38 +29,31 @@ impl<T: KeyValue> FileSystem<T> {
         }
     }
 
-    pub fn update(&self, node: Hash, target: (&[String], Hash), new_child: Hash) -> Option<Hash> {
+    pub fn update(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash> {
         let (target_path, target_node) = target;
 
-        if let Some((target_path_head, target_path_body)) = target_path.split_first() {
-            
-            if target_path_body.is_empty() {
-                let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
-                let mut node_dir = FileSystemDir::from_blob(&node_content);
+        if let Some(target_path_head) = head_vec(target_path) {
+            let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
+            let mut node_dir = FileSystemDir::from_blob(&node_content);
 
-                if target_node == node {
-                    node_dir.set_child(target_path_head.clone(), new_child);
-                    Some(self.key_value.set_blob(node_dir.to_blob()))
-                } else {
-                    None
-                }
+            let new_node_hash = self.update(node, (target_path, target_node), name, new_content);
 
+            if let Some(new_node_hash) = new_node_hash {
+                node_dir.set_child(target_path_head.clone(), new_node_hash);
+                Some(self.key_value.set_blob(node_dir.to_blob()))
             } else {
-
-                let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
-                let mut node_dir = FileSystemDir::from_blob(&node_content);
-
-                let new_node_hash = self.update(node, (target_path_body, target_node), new_child);
-
-                if let Some(new_node_hash) = new_node_hash {
-                    node_dir.set_child(target_path_head.clone(), new_node_hash);
-                    Some(self.key_value.set_blob(node_dir.to_blob()))
-                } else {
-                    None
-                }
+                None
             }
         } else {
-            panic!("nieprawidłowe odgałęzienie");
+            let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
+            let mut node_dir = FileSystemDir::from_blob(&node_content);
+
+            if target_node == node {
+                node_dir.set_child(name.clone(), new_content);
+                Some(self.key_value.set_blob(node_dir.to_blob()))
+            } else {
+                None
+            }
         }
     }
 }
@@ -77,7 +81,8 @@ fn test_update_success() {
 
     let result = fs.update(
         hash_self.clone(),
-        (vec!("hhh".to_string()).as_slice(), hash_self.clone()),
+        (&mut Vec::new(), hash_self.clone()),
+        &"hhh".to_string(),
         Hash::new_for_test(0x50)                                //nowa wartość
     );
 
@@ -109,7 +114,8 @@ fn test_update_fail_target() {
 
     let result = fs.update(
         hash_self.clone(),
-        (vec!("hhh".to_string()).as_slice(), Hash::new_for_test(0x99)),
+        (&mut Vec::new(), Hash::new_for_test(0x99)),
+        &"hhh".to_string(),
         Hash::new_for_test(0x50)                                //nowa wartość
     );
 
