@@ -18,36 +18,35 @@ impl<T: KeyValue> FileSystem<T> {
         }
     }
 
-    pub fn update(&self, node: Hash, target: (Vec<String>, Hash), new_child: Hash) -> Hash {
+    pub fn update(&self, node: Hash, target: (&[String], Hash), new_child: Hash) -> Option<Hash> {
         let (target_path, target_node) = target;
 
-        if let Some((head, body)) = target_path.split_first() {
+        if let Some((target_path_head, target_path_body)) = target_path.split_first() {
             
-            if body.len() == 0 {
+            if target_path_body.len() == 0 {
                 let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
-                let node_dir = FileSystemDir::from_blob(&node_content);
+                let mut node_dir = FileSystemDir::from_blob(&node_content);
 
-                /*
-                    node_dir --- czy ten node zgadza się z haszem docelowego noda --- ?
-
-                    cała funkcja powinna zwracać typ Option<Hash>
-
-
-
-                    dodać drugi przypadek testowy, w którym docelowy hasz się niezgadza
-                */
-
-                panic!("TODO - do doimplementowania");
+                if target_node == node {
+                    node_dir.set_child(target_path_head.clone(), new_child);
+                    Some(self.key_value.set_blob(node_dir.to_blob()))
+                } else {
+                    None
+                }
 
             } else {
 
-                //self.key_value.get_blob(node)
-                //zdekodowany node powinien być katalogiem
-                //w tym katalogu powinniśmy się odwołać do węzła wskazywanym przez zmienną head
-                //wywołujemy rekurencyjny update i dostajemy nowego hasha
-                //zapisujemy ten nasz aktualny katalog, i generujemy nowego hasha którego następnie zwracamy
+                let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
+                let mut node_dir = FileSystemDir::from_blob(&node_content);
 
-                panic!("TODO - to implement");
+                let new_node_hash = self.update(node, (target_path_body, target_node), new_child);
+
+                if let Some(new_node_hash) = new_node_hash {
+                    node_dir.set_child(target_path_head.clone(), new_node_hash);
+                    Some(self.key_value.set_blob(node_dir.to_blob()))
+                } else {
+                    None
+                }
             }
         } else {
             panic!("nieprawidłowe odgałęzienie");
@@ -57,12 +56,12 @@ impl<T: KeyValue> FileSystem<T> {
 
 
 #[test]
-fn test_update() {
+fn test_update_success() {
     use blob::key_value_mock::BlobKeyValue;
 
     let key_value_mock = BlobKeyValue::new();
 
-    key_value_mock.set_blob({
+    let hash_self = key_value_mock.set_blob({
         let dir = FileSystemDir::new_for_test({
             let mut map = HashMap::new();
             map.insert("hhh".to_string(), Hash::new_for_test(3));
@@ -72,13 +71,52 @@ fn test_update() {
         dir.to_blob()
     });
 
+    assert_eq!(hash_self, Hash::from_string("f7affcfe684aad73ab0ad3fedb2b528da33b3022"));
+
     let fs = FileSystem::new(key_value_mock);
 
     let result = fs.update(
-        Hash::from_string("f7affcfe684aad73ab0ad3fedb2b528da33b3022"),
-        (vec!("hhh".to_string()), Hash::new_for_test(0x02)),
-        Hash::new_for_test(0x03)                                //nowa wartość
+        hash_self.clone(),
+        (vec!("hhh".to_string()).as_slice(), hash_self.clone()),
+        Hash::new_for_test(0x50)                                //nowa wartość
     );
 
-    panic!("TODO - trzeba porównać wyniki z oczekiwanymi wartościami");
+    let inner_hash = result.unwrap();
+                                                                //nowy hash powinien być inny
+    assert_ne!(hash_self, inner_hash);
+    assert_eq!(inner_hash, Hash::from_string("ffc872739db509a3109c9c5adcc7b5613ddc7df7"))
+}
+
+#[test]
+fn test_update_fail_target() {
+    use blob::key_value_mock::BlobKeyValue;
+
+    let key_value_mock = BlobKeyValue::new();
+
+    let hash_self = key_value_mock.set_blob({
+        let dir = FileSystemDir::new_for_test({
+            let mut map = HashMap::new();
+            map.insert("hhh".to_string(), Hash::new_for_test(100));
+            map
+        });
+
+        dir.to_blob()
+    });
+
+    assert_eq!(hash_self, Hash::from_string("3ceeaf40f4348b6e1dd6594526c0a963cee75094"));
+
+    let fs = FileSystem::new(key_value_mock);
+
+    let result = fs.update(
+        hash_self.clone(),
+        (vec!("hhh".to_string()).as_slice(), Hash::new_for_test(0x99)),
+        Hash::new_for_test(0x50)                                //nowa wartość
+    );
+
+    assert_eq!(result, None);
+}
+
+#[test]
+fn test_update_recursion() {
+    //TODO
 }

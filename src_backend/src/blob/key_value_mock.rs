@@ -12,7 +12,12 @@ pub struct BlobKeyValue {
 impl KeyValue for BlobKeyValue {
     fn set_blob(&self, content: Vec<u8>) -> Hash {
         let hash = hash_by_content(&content);
-        assert_eq!(self.data.borrow_mut().insert(hash.clone(), content), None);
+        let old_content = self.data.borrow_mut().insert(hash.clone(), content.clone());
+
+        if let Some(old_inner) = old_content {
+            assert_eq!(old_inner, content);
+        }
+ 
         println!("set_blob by {}", hash.to_hex());
         hash
     }

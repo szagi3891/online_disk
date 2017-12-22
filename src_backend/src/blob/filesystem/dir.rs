@@ -39,4 +39,8 @@ impl FileSystemDir {
         out.append(&mut json);
         out
     }
+
+    pub fn set_child(&mut self, subdir: String, target: Hash) {
+        self.files.insert(subdir, target);
+    }
 }
