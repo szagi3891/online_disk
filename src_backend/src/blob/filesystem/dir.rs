@@ -40,7 +40,11 @@ impl FileSystemDir {
         out
     }
 
-    pub fn set_child(&mut self, subdir: String, target: Hash) {
-        self.files.insert(subdir, target);
+    pub fn set_child(&mut self, subdir: &String, target: Hash) {
+        self.files.insert(subdir.clone(), target);
+    }
+
+    pub fn get_child(&self, subdir: &String) -> Hash {
+        self.files.get(subdir).unwrap().clone()
     }
 }

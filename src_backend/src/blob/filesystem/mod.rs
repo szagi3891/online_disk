@@ -29,32 +29,40 @@ impl<T: KeyValue> FileSystem<T> {
         }
     }
 
-    pub fn update(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash> {
+    fn modify_mode<TF>(&self, node: Hash, target: (&mut Vec<String>, Hash), modify_node_f: TF) -> Option<Hash>
+        where TF : FnOnce(FileSystemDir) -> FileSystemDir {
         let (target_path, target_node) = target;
 
         if let Some(target_path_head) = head_vec(target_path) {
             let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
             let mut node_dir = FileSystemDir::from_blob(&node_content);
 
-            let new_node_hash = self.update(node, (target_path, target_node), name, new_content);
+            let next_node = node_dir.get_child(&target_path_head);
 
-            if let Some(new_node_hash) = new_node_hash {
-                node_dir.set_child(target_path_head.clone(), new_node_hash);
-                Some(self.key_value.set_blob(node_dir.to_blob()))
-            } else {
-                None
-            }
+            self.modify_mode(next_node, (target_path, target_node), modify_node_f)
+                .map(move |new_node_hash| {
+                    node_dir.set_child(&target_path_head, new_node_hash);
+                    self.key_value.set_blob(node_dir.to_blob())
+                })
+        
         } else {
             let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
             let mut node_dir = FileSystemDir::from_blob(&node_content);
 
             if target_node == node {
-                node_dir.set_child(name.clone(), new_content);
+                let node_dir = modify_node_f(node_dir);
                 Some(self.key_value.set_blob(node_dir.to_blob()))
             } else {
                 None
             }
         }
+    }
+
+    pub fn update(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash> {
+        self.modify_mode(node, target, |mut node_dir: FileSystemDir| {
+            node_dir.set_child(name, new_content);
+            node_dir
+        })
     }
 }
 
