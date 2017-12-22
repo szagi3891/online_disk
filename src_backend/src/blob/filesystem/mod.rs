@@ -29,7 +29,7 @@ impl<T: KeyValue> FileSystem<T> {
         }
     }
 
-    fn modify_mode<TF>(&self, node: Hash, target: (&mut Vec<String>, Hash), modify_node_f: TF) -> Option<Hash>
+    fn modify_node<TF>(&self, node: Hash, target: (&mut Vec<String>, Hash), modify_node_f: TF) -> Option<Hash>
         where TF : FnOnce(FileSystemDir) -> FileSystemDir {
         let (target_path, target_node) = target;
 
@@ -39,7 +39,7 @@ impl<T: KeyValue> FileSystem<T> {
 
             let next_node = node_dir.get_child(&target_path_head);
 
-            self.modify_mode(next_node, (target_path, target_node), modify_node_f)
+            self.modify_node(next_node, (target_path, target_node), modify_node_f)
                 .map(move |new_node_hash| {
                     node_dir.set_child(&target_path_head, new_node_hash);
                     self.key_value.set_blob(node_dir.to_blob())
@@ -59,11 +59,34 @@ impl<T: KeyValue> FileSystem<T> {
     }
 
     pub fn update(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash> {
-        self.modify_mode(node, target, |mut node_dir: FileSystemDir| {
+        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
             node_dir.set_child(name, new_content);
             node_dir
         })
     }
+
+    pub fn add(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash> {
+        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
+            node_dir.add_child(name, new_content);
+            node_dir
+        })
+    }
+
+    pub fn remove(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String) -> Option<Hash> {
+        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
+            node_dir.remove_child(name);
+            node_dir
+        })
+    }
+
+    pub fn rename(&self, node: Hash, target: (&mut Vec<String>, Hash), old_name: &String, new_name: &String) -> Option<Hash> {
+        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
+            node_dir.rename_child(old_name, new_name);
+            node_dir
+        })
+    }
+
+    //TODO - get ...
 }
 
 

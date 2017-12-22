@@ -47,4 +47,25 @@ impl FileSystemDir {
     pub fn get_child(&self, subdir: &String) -> Hash {
         self.files.get(subdir).unwrap().clone()
     }
+
+    pub fn add_child(&mut self, new_subdir: &String, content: Hash) {
+        assert_eq!(self.files.insert(new_subdir.clone(), content), None);
+    }
+
+    pub fn remove_child(&mut self, name: &String) {
+        let result = self.files.remove(name);
+        if result.is_none() {
+            panic!("Nieprawidłowe odgałęzienie programu");
+        }
+    }
+
+    pub fn rename_child(&mut self, old_name: &String, new_name: &String) {
+        let result = self.files.remove(old_name);
+
+        if let Some(hash) = result {
+            assert_eq!(self.files.insert(new_name.clone(), hash), None);
+        } else {
+            panic!("Nieprawidłowe odgałęzienie programu");
+        }
+    }
 }
