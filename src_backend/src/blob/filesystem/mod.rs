@@ -29,14 +29,30 @@ impl<T: KeyValue> FileSystem<T> {
         }
     }
 
+    fn get_dir(&self, node: &Hash) -> FileSystemDir {
+        let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
+        FileSystemDir::from_blob(&node_content)
+    }
+
+    pub fn get(&self, node: Hash, target_path: &mut Vec<String>, name: &String) -> Option<Vec<u8>> {
+        if let Some(target_path_head) = head_vec(target_path) {
+            let next_node = self.get_dir(&node).get_child(&target_path_head);
+            self.get(next_node, target_path, name)
+        
+        } else {
+            let content_node = self.get_dir(&node).get_child(&name);
+
+            //Trzeba skonwertować zawartość do postaci jsonowej która zostanie zwrócona do klienta
+            panic!("TODO");
+        }
+    }
+
     fn modify_node<TF>(&self, node: Hash, target: (&mut Vec<String>, Hash), modify_node_f: TF) -> Option<Hash>
         where TF : FnOnce(FileSystemDir) -> FileSystemDir {
         let (target_path, target_node) = target;
 
         if let Some(target_path_head) = head_vec(target_path) {
-            let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
-            let mut node_dir = FileSystemDir::from_blob(&node_content);
-
+            let mut node_dir = self.get_dir(&node);
             let next_node = node_dir.get_child(&target_path_head);
 
             self.modify_node(next_node, (target_path, target_node), modify_node_f)
@@ -46,11 +62,8 @@ impl<T: KeyValue> FileSystem<T> {
                 })
         
         } else {
-            let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
-            let mut node_dir = FileSystemDir::from_blob(&node_content);
-
             if target_node == node {
-                let node_dir = modify_node_f(node_dir);
+                let node_dir = modify_node_f(self.get_dir(&node));
                 Some(self.key_value.set_blob(node_dir.to_blob()))
             } else {
                 None
@@ -85,8 +98,6 @@ impl<T: KeyValue> FileSystem<T> {
             node_dir
         })
     }
-
-    //TODO - get ...
 }
 
 
