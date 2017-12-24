@@ -1,0 +1,23 @@
+https://marketplace.visualstudio.com/items?itemName=rust-lang.rust
+
+https://github.com/rust-lang-nursery/rls
+
+https://github.com/rust-lang-nursery/rls-vscode
+
+
+rustup default nightly-2017-11-19
+rustup component add rust-src --toolchain nightly-2017-11-19
+rustup component add rust-analysis --toolchain nightly-2017-11-19
+rustup component add rls-preview --toolchain nightly-2017-11-19
+
+
+// Place your settings in this file to overwrite the default settings
+{
+    "javascript.validate.enable": false,
+    "workbench.editor.openPositioning": "last",
+    "workbench.editor.showTabs": false,
+    "explorer.openEditors.visible": 12,
+    "explorer.autoReveal": false,
+    "rust-client.channel": "nightly-2017-11-19"
+}
+

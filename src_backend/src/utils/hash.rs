@@ -16,17 +16,6 @@ impl Hash {
             hash: hash
         }
     }
-
-    #[test]
-    pub fn new_for_test(test_num: u8) -> Hash {
-        Hash::new([
-            0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0,
-            0, 0, 0, 0, test_num
-        ])
-    }
-
                                                                 //TODO zmienić potem nazwę na from_bytes
     pub fn from_bytes(hash: &[u8]) -> Hash {
         

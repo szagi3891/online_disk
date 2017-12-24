@@ -27,7 +27,6 @@ fn main() {
 
         use blob::key_value::BlobKeyValue;
         use blob::fs::FsIo;
-        use utils::hash::Hash;
 
         let key_value_manager = BlobKeyValue::new(root_path, FsIo{});
 
@@ -38,6 +37,8 @@ fn main() {
         */
 
         /*
+        use utils::hash::Hash;
+
         println!(
             "AA {:?}",
             key_value_manager.get_blob(&Hash::new([

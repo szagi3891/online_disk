@@ -34,17 +34,10 @@ impl<T: KeyValue> FileSystem<T> {
         FileSystemDir::from_blob(&node_content)
     }
 
-    pub fn get(&self, node: Hash, target_path: &mut Vec<String>, name: &String) -> Option<Vec<u8>> {
-        if let Some(target_path_head) = head_vec(target_path) {
-            let next_node = self.get_dir(&node).get_child(&target_path_head);
-            self.get(next_node, target_path, name)
-        
-        } else {
-            let content_node = self.get_dir(&node).get_child(&name);
+    pub fn get(&self, node: Hash) -> Option<Vec<u8>> {
+        let node_content = self.key_value.get_blob(&node).unwrap();
 
-            //Trzeba skonwertować zawartość do postaci jsonowej która zostanie zwrócona do klienta
-            panic!("TODO");
-        }
+        panic!("TODO");
     }
 
     fn modify_node<TF>(&self, node: Hash, target: (&mut Vec<String>, Hash), modify_node_f: TF) -> Option<Hash>
@@ -110,7 +103,7 @@ fn test_update_success() {
     let hash_self = key_value_mock.set_blob({
         let dir = FileSystemDir::new_for_test({
             let mut map = HashMap::new();
-            map.insert("hhh".to_string(), Hash::new_for_test(3));
+            map.insert("hhh".to_string(), new_hash_for_test(3));
             map
         });
 
@@ -125,7 +118,7 @@ fn test_update_success() {
         hash_self.clone(),
         (&mut Vec::new(), hash_self.clone()),
         &"hhh".to_string(),
-        Hash::new_for_test(0x50)                                //nowa wartość
+        new_hash_for_test(0x50)                                //nowa wartość
     );
 
     let inner_hash = result.unwrap();
@@ -143,7 +136,7 @@ fn test_update_fail_target() {
     let hash_self = key_value_mock.set_blob({
         let dir = FileSystemDir::new_for_test({
             let mut map = HashMap::new();
-            map.insert("hhh".to_string(), Hash::new_for_test(100));
+            map.insert("hhh".to_string(), new_hash_for_test(100));
             map
         });
 
@@ -156,15 +149,19 @@ fn test_update_fail_target() {
 
     let result = fs.update(
         hash_self.clone(),
-        (&mut Vec::new(), Hash::new_for_test(0x99)),
+        (&mut Vec::new(), new_hash_for_test(0x99)),
         &"hhh".to_string(),
-        Hash::new_for_test(0x50)                                //nowa wartość
+        new_hash_for_test(0x50)                                //nowa wartość
     );
 
     assert_eq!(result, None);
 }
 
-#[test]
-fn test_update_recursion() {
-    //TODO
+fn new_hash_for_test(test_num: u8) -> Hash {
+    Hash::new([
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, test_num
+    ])
 }
