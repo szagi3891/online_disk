@@ -12,7 +12,7 @@ pub struct FileSystemDir {
 
 impl FileSystemDir {
 
-    pub fn new_for_test(data: HashMap<String, Hash>) -> FileSystemDir {
+    pub fn new(data: HashMap<String, Hash>) -> FileSystemDir {
         FileSystemDir {
             files: data
         }

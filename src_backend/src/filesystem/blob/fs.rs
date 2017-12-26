@@ -1,9 +1,7 @@
 use std::path::Path;
 use std::io::Result;
 use filesystem::blob::types::Fs;
-
-mod save_file;
-mod get_file;
+use filesystem::utils::{get_file, save_file};
 
 #[derive(Clone)]
 pub struct FsIo {

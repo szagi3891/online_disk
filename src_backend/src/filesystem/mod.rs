@@ -1,14 +1,21 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::fs::create_dir_all;
 
 mod blob;
-mod data;
+pub mod data;
 mod head;
-mod utils;
+pub mod utils;
 
 use filesystem::head::FileSystemHead;
 use filesystem::data::FileSystemData;
 use filesystem::blob::key_value::BlobKeyValue;
 use filesystem::blob::fs::FsIo;
+
+fn create_sub_path(path: &Path, sub_dir: &str) -> PathBuf {
+    let mut path_buf = path.to_path_buf();
+    path_buf.push(sub_dir);
+    path_buf
+}
 
 #[derive(Clone)]
 pub struct FileSystem {
@@ -18,22 +25,27 @@ pub struct FileSystem {
 
 impl FileSystem {
     pub fn new(path: &Path) -> FileSystem {
-        FileSystem {
-            head: FileSystemHead::new({
-                let mut path_head = path.to_path_buf();
-                path_head.push("head");
-                path_head
-            }),
-            data: FileSystemData::new(
-                BlobKeyValue::new(
-                    {
-                        let mut path_data = path.to_path_buf();
-                        path_data.push("data");
-                        path_data
-                    },
-                    FsIo{}
-                )
+        let path_head = create_sub_path(path, "head");
+        let path_data = create_sub_path(path, "data");
+
+        create_dir_all(&path_head).unwrap();
+        create_dir_all(&path_data).unwrap();
+
+        let data = FileSystemData::new(
+            BlobKeyValue::new(
+                path_data,
+                FsIo{}
             )
+        );
+
+        let head = FileSystemHead::new(
+            path_head,
+            &data
+        );
+
+        FileSystem {
+            head: head,
+            data: data
         }
     }
 

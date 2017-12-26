@@ -107,6 +107,11 @@ impl<T: KeyValue> FileSystemData<T> {
             node_dir
         })
     }
+
+    pub fn create_empty_dir(&self) -> Hash {
+        let dir = FileSystemDir::new(HashMap::new());
+        self.key_value.set_blob(&dir.to_blob())
+    }
 }
 
 
@@ -117,7 +122,7 @@ fn test_update_success() {
     let key_value_mock = BlobKeyValue::new();
 
     let hash_self = key_value_mock.set_blob({
-        let dir = FileSystemDir::new_for_test({
+        let dir = FileSystemDir::new({
             let mut map = HashMap::new();
             map.insert("hhh".to_string(), new_hash_for_test(3));
             map
@@ -150,7 +155,7 @@ fn test_update_fail_target() {
     let key_value_mock = BlobKeyValue::new();
 
     let hash_self = key_value_mock.set_blob({
-        let dir = FileSystemDir::new_for_test({
+        let dir = FileSystemDir::new({
             let mut map = HashMap::new();
             map.insert("hhh".to_string(), new_hash_for_test(100));
             map

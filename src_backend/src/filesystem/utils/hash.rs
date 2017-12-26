@@ -16,6 +16,7 @@ impl Hash {
             hash: hash
         }
     }
+    /*
                                                                 //TODO zmienić potem nazwę na from_bytes
     pub fn from_bytes(hash: &[u8]) -> Hash {
         
@@ -30,6 +31,7 @@ impl Hash {
             hash: out
         }
     }
+    */
 
     pub fn add_to_path(&self, path: &mut PathBuf) {        
         let slice = &self.hash[..];
@@ -55,9 +57,13 @@ impl Hash {
         }
     }
 
-    pub fn from_string(data: &str) -> Hash {
-        let bytes = data.as_bytes();
-        
+    pub fn to_vec(&self) -> Vec<u8> {
+        let mut out = Vec::new();
+        self.serialize(&mut out);
+        out
+    }
+
+    pub fn from_string_bytes(bytes: &[u8]) -> Hash {
         assert_eq!(bytes.len(), 40);
 
         let mut out = [
@@ -75,5 +81,10 @@ impl Hash {
         }
 
         Hash::new(out)
+    }
+
+    pub fn from_string(data: &str) -> Hash {
+        let bytes = data.as_bytes();
+        Hash::from_string_bytes(bytes)
     }
 }

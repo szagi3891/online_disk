@@ -3,9 +3,10 @@ extern crate serde;
 extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
+extern crate chrono;
 
 use std::env;
-
+use std::path::Path;
 mod filesystem;
 
 //use filesystem::FileSystem;
@@ -25,6 +26,8 @@ fn main() {
 
     if let Some(root_path) = env::args().nth(1) {
         println!("The first argument is {}", &root_path);
+
+        let fs = filesystem::FileSystem::new(Path::new(root_path.as_str()));
 
         //FileSystem::new()
 
