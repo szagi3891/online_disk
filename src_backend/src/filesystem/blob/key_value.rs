@@ -1,9 +1,9 @@
 use std::path::PathBuf;
 use std::fmt::Write;
 
-use utils::hash_by_content::hash_by_content;
+use filesystem::utils::hash_by_content::hash_by_content;
 use filesystem::blob::types::Fs;
-use utils::hash::Hash;
+use filesystem::utils::hash::Hash;
 use filesystem::blob::types::KeyValue;
 
 #[derive(Clone)]

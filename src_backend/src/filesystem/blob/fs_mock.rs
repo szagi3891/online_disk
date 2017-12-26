@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::io::Result;
 use filesystem::blob::types::Fs;
-use utils::hex::to_hex;
+use filesystem::utils::hex::to_hex;
 use std::cell::RefCell;
 
 pub struct FsMock {

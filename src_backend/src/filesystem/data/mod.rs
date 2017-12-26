@@ -1,5 +1,5 @@
 use filesystem::blob::types::KeyValue;
-use utils::hash::Hash;
+use filesystem::utils::hash::Hash;
 use std::collections::HashMap;
 
 mod dir;

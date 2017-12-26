@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use utils::hex::to_hex;
+use filesystem::utils::hex::to_hex;
 
 #[derive(PartialEq, Hash, Clone, Serialize, Deserialize, Debug)]
 pub struct Hash {

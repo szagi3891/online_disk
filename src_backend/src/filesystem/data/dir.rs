@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use serde_json;
 
-use utils::hash::Hash;
+use filesystem::utils::hash::Hash;
 
 const CODE_FORMAT: u8 = 102;       //'f'
 

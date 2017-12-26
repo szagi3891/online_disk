@@ -1,9 +1,9 @@
-use utils::hash::Hash;
 use std::path::Path;
 
 mod blob;
 mod data;
 mod head;
+mod utils;
 
 use filesystem::head::FileSystemHead;
 use filesystem::data::FileSystemData;
@@ -37,12 +37,32 @@ impl FileSystem {
         }
     }
 
-    pub fn transaction(&self, prev_head: Hash, next_head: Hash) -> Result<(), ()> {
-        self.head.transaction(prev_head, next_head);
-        Ok(())
-    }
+    /*
+    Todo: do zaimplementowania wewnętrzne metody head
 
-    pub fn current_head(&self) -> Hash {
-        self.head.current_head()
-    }
+    self.head.replace(prev_head, next_head);
+    self.head.current_head();
+
+
+    Publiczne metody które będzie udostępniała ta struktura:
+
+    1)
+    pub fn get_dir(&self, node: &Hash) -> FileSystemDir
+    
+    2)
+    pub fn update(&self, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Result<(), ()>
+        --> current_head + pub fn update(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash>
+
+    3)
+    pub fn add(&self, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Result<(), ()>
+        --> current_head + pub fn add(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash>
+
+    4)
+    pub fn remove(&self, target: (&mut Vec<String>, Hash), name: &String) -> Result<(), ()>
+        --> current_head + pub fn remove(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String) -> Option<Hash>
+
+    5)
+    pub fn rename(&self, target: (&mut Vec<String>, Hash), old_name: &String, new_name: &String) -> Result<(), ()>
+        --> current_head + pub fn rename(&self, node: Hash, target: (&mut Vec<String>, Hash), old_name: &String, new_name: &String) -> Option<Hash>
+    */
 }

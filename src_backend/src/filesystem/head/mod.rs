@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use std::sync::RwLock;
-use utils::hash::Hash;
+use filesystem::utils::hash::Hash;
 use std::path::PathBuf;
 
 struct FileSystemHeadInner {
@@ -14,7 +14,7 @@ impl FileSystemHeadInner {
         }
     }
 
-    pub fn transaction(&self, prev_head: Hash, next_head: Hash) -> Result<(), ()> {
+    pub fn replace(&self, prev_head: Hash, next_head: Hash) -> Result<(), ()> {
         panic!("TODO");
     }
 
@@ -35,9 +35,9 @@ impl FileSystemHead {
         }
     }
 
-    pub fn transaction(&self, prev_head: Hash, next_head: Hash) -> Result<(), ()> {
+    pub fn replace(&self, prev_head: Hash, next_head: Hash) -> Result<(), ()> {
         let inner = self.inner.write().unwrap();
-        inner.transaction(prev_head, next_head)
+        inner.replace(prev_head, next_head)
     }
 
     pub fn current_head(&self) -> Hash {

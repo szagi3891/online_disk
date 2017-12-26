@@ -6,10 +6,9 @@ extern crate serde_derive;
 
 use std::env;
 
-mod utils;
 mod filesystem;
 
-use filesystem::FileSystem;
+//use filesystem::FileSystem;
 
 //use blob::BlobKeyValue;
 

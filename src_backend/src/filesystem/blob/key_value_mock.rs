@@ -2,8 +2,8 @@ use filesystem::blob::types::KeyValue;
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use utils::hash::Hash;
-use utils::hash_by_content::hash_by_content;
+use filesystem::utils::hash::Hash;
+use filesystem::utils::hash_by_content::hash_by_content;
 
 pub struct BlobKeyValue {
     data: RefCell<HashMap<Hash, Vec<u8>>>
