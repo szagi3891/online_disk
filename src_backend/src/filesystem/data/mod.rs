@@ -1,4 +1,4 @@
-use blob::types::KeyValue;
+use filesystem::blob::types::KeyValue;
 use utils::hash::Hash;
 use std::collections::HashMap;
 
@@ -24,13 +24,13 @@ pub enum GetResult {
     Dir(HashMap<String, Hash>),
 }
 
-pub struct FileSystem<T: KeyValue> {
+pub struct FileSystemData<T: KeyValue> {
     key_value: T,
 }
 
-impl<T: KeyValue> FileSystem<T> {
-    pub fn new(key_value: T) -> FileSystem<T> {
-        FileSystem {
+impl<T: KeyValue> FileSystemData<T> {
+    pub fn new(key_value: T) -> FileSystemData<T> {
+        FileSystemData {
             key_value: key_value
         }
     }
@@ -111,7 +111,7 @@ impl<T: KeyValue> FileSystem<T> {
 
 #[test]
 fn test_update_success() {
-    use blob::key_value_mock::BlobKeyValue;
+    use filesystem::blob::key_value_mock::BlobKeyValue;
 
     let key_value_mock = BlobKeyValue::new();
 
@@ -127,7 +127,7 @@ fn test_update_success() {
 
     assert_eq!(hash_self, Hash::from_string("f7affcfe684aad73ab0ad3fedb2b528da33b3022"));
 
-    let fs = FileSystem::new(key_value_mock);
+    let fs = FileSystemData::new(key_value_mock);
 
     let result = fs.update(
         hash_self.clone(),
@@ -144,7 +144,7 @@ fn test_update_success() {
 
 #[test]
 fn test_update_fail_target() {
-    use blob::key_value_mock::BlobKeyValue;
+    use filesystem::blob::key_value_mock::BlobKeyValue;
 
     let key_value_mock = BlobKeyValue::new();
 
@@ -160,7 +160,7 @@ fn test_update_fail_target() {
 
     assert_eq!(hash_self, Hash::from_string("3ceeaf40f4348b6e1dd6594526c0a963cee75094"));
 
-    let fs = FileSystem::new(key_value_mock);
+    let fs = FileSystemData::new(key_value_mock);
 
     let result = fs.update(
         hash_self.clone(),

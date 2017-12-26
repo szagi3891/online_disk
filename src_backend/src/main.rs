@@ -6,8 +6,8 @@ extern crate serde_derive;
 
 use std::env;
 
-mod blob;
 mod utils;
+mod filesystem;
 
 //use blob::BlobKeyValue;
 
@@ -25,10 +25,12 @@ fn main() {
     if let Some(root_path) = env::args().nth(1) {
         println!("The first argument is {}", &root_path);
 
-        use blob::key_value::BlobKeyValue;
+        /*
+        use filesystem::blob::key_value::BlobKeyValue;
         use blob::fs::FsIo;
 
         let key_value_manager = BlobKeyValue::new(root_path, FsIo{});
+        */
 
         /*
         key_value_manager.set_blob("dasdas1".to_string().into_bytes());
@@ -51,7 +53,7 @@ fn main() {
         );
         */
 
-        key_value_manager.set_blob(&"111 dasdas3 dsdasdasd asdasd asdasdas dasdas dasdasd sadasdas dasdasd adasdas dasdas".to_string().into_bytes());
+        //key_value_manager.set_blob(&"111 dasdas3 dsdasdasd asdasd asdasdas dasdas dasdasd sadasdas dasdasd adasdas dasdas".to_string().into_bytes());
 
     } else {
         panic!("Brak parametru");       //TODO

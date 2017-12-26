@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::io::Result;
-use blob::types::Fs;
+use filesystem::blob::types::Fs;
 
 mod save_file;
 mod get_file;

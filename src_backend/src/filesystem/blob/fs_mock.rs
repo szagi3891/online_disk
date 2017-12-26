@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::io::Result;
-use blob::types::Fs;
+use filesystem::blob::types::Fs;
 use utils::hex::to_hex;
 use std::cell::RefCell;
 

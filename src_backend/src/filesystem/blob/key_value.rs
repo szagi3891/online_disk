@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::fmt::Write;
 
 use utils::hash_by_content::hash_by_content;
-use blob::types::Fs;
+use filesystem::blob::types::Fs;
 use utils::hash::Hash;
 
 pub struct BlobKeyValue<T> where T: Fs {
@@ -101,8 +101,8 @@ fn to_hex_u16(input: u16) -> String {
 
 #[test]
 fn test_save_blob() {
-    use blob::key_value::BlobKeyValue;
-    use blob::fs_mock::FsMock;
+    use filesystem::blob::key_value::BlobKeyValue;
+    use filesystem::blob::fs_mock::FsMock;
 
     let blob_key_value = BlobKeyValue::new(
         "Path/Root".to_string(),
@@ -119,8 +119,8 @@ fn test_save_blob() {
 
 #[test]
 fn test_get_blob() {
-    use blob::key_value::BlobKeyValue;
-    use blob::fs_mock::FsMock;
+    use filesystem::blob::key_value::BlobKeyValue;
+    use filesystem::blob::fs_mock::FsMock;
 
     let blob_key_value = BlobKeyValue::new(
         "Path/Root".to_string(),
