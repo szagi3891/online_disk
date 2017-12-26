@@ -18,19 +18,25 @@ impl FileSystemDir {
         }
     }
 
-    pub fn from_blob(content: &[u8]) -> FileSystemDir {
+    pub fn to_hashmap(self) -> HashMap<String, Hash> {
+        self.files
+    }
+
+    pub fn from_blob(content: &[u8]) -> Result<FileSystemDir, ()> {
 
         if let Some((head, body)) = content.split_first() {
-            assert_eq!(*head, CODE_FORMAT);
+            if *head != CODE_FORMAT {
+                return Err(());
+            }
 
             let files: HashMap<String, Hash> = serde_json::from_slice(body).unwrap();
 
-            return FileSystemDir {
+            return Ok(FileSystemDir {
                 files: files
-            };
+            });
         }
 
-        panic!("Nieprawidłowe odgałęzienie programu");
+        Err(())
     }
 
     pub fn to_blob(&self) -> Vec<u8> {

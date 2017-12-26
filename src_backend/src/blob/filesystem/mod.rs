@@ -6,6 +6,7 @@ mod dir;
 mod file;
 
 use self::dir::FileSystemDir;
+use self::file::FileSystemFile;
 
 fn head_vec<T>(list: &mut Vec<T>) -> Option<T> {
     if list.len() < 1 {
@@ -16,6 +17,11 @@ fn head_vec<T>(list: &mut Vec<T>) -> Option<T> {
     let head = list.pop();
     *list = body;
     head
+}
+
+pub enum GetResult {
+    File(Vec<u8>),
+    Dir(HashMap<String, Hash>),
 }
 
 pub struct FileSystem<T: KeyValue> {
@@ -31,13 +37,22 @@ impl<T: KeyValue> FileSystem<T> {
 
     fn get_dir(&self, node: &Hash) -> FileSystemDir {
         let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
-        FileSystemDir::from_blob(&node_content)
+        FileSystemDir::from_blob(&node_content).unwrap()
     }
 
-    pub fn get(&self, node: Hash) -> Option<Vec<u8>> {
-        let node_content = self.key_value.get_blob(&node).unwrap();
+    pub fn get(&self, node: Hash) -> Option<GetResult> {
+        if let Some(node_content) = self.key_value.get_blob(&node) {
 
-        panic!("TODO");
+            if let Ok(dir) = FileSystemDir::from_blob(&node_content) {
+                return Some(GetResult::Dir(dir.to_hashmap()));
+            }
+
+            if let Ok(file) = FileSystemFile::from_blob(&node_content) {
+                return Some(GetResult::File(file.to_data()));
+            }
+        }
+
+        None
     }
 
     fn modify_node<TF>(&self, node: Hash, target: (&mut Vec<String>, Hash), modify_node_f: TF) -> Option<Hash>
