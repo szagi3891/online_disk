@@ -24,6 +24,7 @@ pub enum GetResult {
     Dir(HashMap<String, Hash>),
 }
 
+#[derive(Clone)]
 pub struct FileSystemData<T: KeyValue> {
     key_value: T,
 }
@@ -66,13 +67,13 @@ impl<T: KeyValue> FileSystemData<T> {
             self.modify_node(next_node, (target_path, target_node), modify_node_f)
                 .map(move |new_node_hash| {
                     node_dir.set_child(&target_path_head, new_node_hash);
-                    self.key_value.set_blob(node_dir.to_blob())
+                    self.key_value.set_blob(&node_dir.to_blob())
                 })
         
         } else {
             if target_node == node {
                 let node_dir = modify_node_f(self.get_dir(&node));
-                Some(self.key_value.set_blob(node_dir.to_blob()))
+                Some(self.key_value.set_blob(&node_dir.to_blob()))
             } else {
                 None
             }
@@ -122,7 +123,7 @@ fn test_update_success() {
             map
         });
 
-        dir.to_blob()
+        &dir.to_blob()
     });
 
     assert_eq!(hash_self, Hash::from_string("f7affcfe684aad73ab0ad3fedb2b528da33b3022"));
@@ -155,7 +156,7 @@ fn test_update_fail_target() {
             map
         });
 
-        dir.to_blob()
+        &dir.to_blob()
     });
 
     assert_eq!(hash_self, Hash::from_string("3ceeaf40f4348b6e1dd6594526c0a963cee75094"));

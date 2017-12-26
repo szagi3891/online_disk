@@ -1,48 +1,48 @@
-use std::sync::Arc;
-use std::sync::RwLock;
 use utils::hash::Hash;
+use std::path::Path;
 
 mod blob;
 mod data;
+mod head;
 
-struct FileSystemInner {
-    //head: Hash,
-}
-
-impl FileSystemInner {
-    pub fn new() -> FileSystemInner {
-        FileSystemInner {
-        }
-    }
-
-    pub fn transaction(&self, prev_head: Hash, next_head: Hash) -> Result<(), ()> {
-        panic!("TODO");
-    }
-
-    pub fn current_head(&self) -> Hash {
-        panic!("TODO")
-    }
-}
+use filesystem::head::FileSystemHead;
+use filesystem::data::FileSystemData;
+use filesystem::blob::key_value::BlobKeyValue;
+use filesystem::blob::fs::FsIo;
 
 #[derive(Clone)]
 pub struct FileSystem {
-    inner: Arc<RwLock<FileSystemInner>>,
+    head: FileSystemHead,
+    data: FileSystemData<BlobKeyValue<FsIo>>,
 }
 
 impl FileSystem {
-    pub fn new() -> FileSystem {
+    pub fn new(path: &Path) -> FileSystem {
         FileSystem {
-            inner: Arc::new(RwLock::new(FileSystemInner::new()))
+            head: FileSystemHead::new({
+                let mut path_head = path.to_path_buf();
+                path_head.push("head");
+                path_head
+            }),
+            data: FileSystemData::new(
+                BlobKeyValue::new(
+                    {
+                        let mut path_data = path.to_path_buf();
+                        path_data.push("data");
+                        path_data
+                    },
+                    FsIo{}
+                )
+            )
         }
     }
 
     pub fn transaction(&self, prev_head: Hash, next_head: Hash) -> Result<(), ()> {
-        let inner = self.inner.write().unwrap();
-        inner.transaction(prev_head, next_head)
+        self.head.transaction(prev_head, next_head);
+        Ok(())
     }
 
     pub fn current_head(&self) -> Hash {
-        let inner = self.inner.read().unwrap();
-        inner.current_head()
+        self.head.current_head()
     }
 }

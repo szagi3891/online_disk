@@ -4,21 +4,29 @@ use std::fmt::Write;
 use utils::hash_by_content::hash_by_content;
 use filesystem::blob::types::Fs;
 use utils::hash::Hash;
+use filesystem::blob::types::KeyValue;
 
+#[derive(Clone)]
 pub struct BlobKeyValue<T> where T: Fs {
     data_path: PathBuf,
     fs: T,
 }
 
 impl<T> BlobKeyValue<T> where T : Fs {
-    pub fn new(data_path: String, fs: T) -> BlobKeyValue<T> {
+    pub fn new(data_path: PathBuf, fs: T) -> BlobKeyValue<T> {
         BlobKeyValue {
-            data_path: PathBuf::from(data_path),
+            data_path: data_path,
             fs: fs
         }
     }
 
-    pub fn set_blob(&self, content: &[u8]) -> Hash {
+    pub fn get_fs(self) -> T {
+        self.fs
+    }
+}
+
+impl<T> KeyValue for BlobKeyValue<T> where T : Fs {
+    fn set_blob(&self, content: &[u8]) -> Hash {
         let hash = hash_by_content(content);
         let file_path = create_file_path(&self.data_path, &hash);
 
@@ -27,13 +35,9 @@ impl<T> BlobKeyValue<T> where T : Fs {
         hash
     }
 
-    pub fn get_blob(&self, hash: &Hash) -> Option<Vec<u8>> {
+    fn get_blob(&self, hash: &Hash) -> Option<Vec<u8>> {
         let file_path = create_file_path(&self.data_path, hash);
         self.fs.get_file(file_path.as_path())
-    }
-
-    pub fn get_fs(self) -> T {
-        self.fs
     }
 }
 
@@ -105,7 +109,7 @@ fn test_save_blob() {
     use filesystem::blob::fs_mock::FsMock;
 
     let blob_key_value = BlobKeyValue::new(
-        "Path/Root".to_string(),
+        PathBuf::from("Path/Root".to_string()),
         FsMock::new()
     );
 
@@ -123,7 +127,7 @@ fn test_get_blob() {
     use filesystem::blob::fs_mock::FsMock;
 
     let blob_key_value = BlobKeyValue::new(
-        "Path/Root".to_string(),
+        PathBuf::from("Path/Root".to_string()),
         FsMock::new()
     );
 

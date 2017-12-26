@@ -5,6 +5,7 @@ use filesystem::blob::types::Fs;
 mod save_file;
 mod get_file;
 
+#[derive(Clone)]
 pub struct FsIo {
 }
 

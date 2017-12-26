@@ -9,6 +9,8 @@ use std::env;
 mod utils;
 mod filesystem;
 
+use filesystem::FileSystem;
+
 //use blob::BlobKeyValue;
 
 /*
@@ -24,6 +26,8 @@ fn main() {
 
     if let Some(root_path) = env::args().nth(1) {
         println!("The first argument is {}", &root_path);
+
+        //FileSystem::new()
 
         /*
         use filesystem::blob::key_value::BlobKeyValue;

@@ -8,6 +8,6 @@ pub trait Fs {
 }
 
 pub trait KeyValue {
-    fn set_blob(&self, content: Vec<u8>) -> Hash;
+    fn set_blob(&self, content: &[u8]) -> Hash;
     fn get_blob(&self, hash: &Hash) -> Option<Vec<u8>>;
 }

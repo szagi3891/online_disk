@@ -10,9 +10,13 @@ pub struct BlobKeyValue {
 }
 
 impl KeyValue for BlobKeyValue {
-    fn set_blob(&self, content: Vec<u8>) -> Hash {
-        let hash = hash_by_content(&content);
-        let old_content = self.data.borrow_mut().insert(hash.clone(), content.clone());
+    fn set_blob(&self, content: &[u8]) -> Hash {
+        let hash = hash_by_content(content);
+
+        let mut content_vec: Vec<u8> = Vec::new();
+        content_vec.extend_from_slice(content);
+
+        let old_content = self.data.borrow_mut().insert(hash.clone(), content_vec);
 
         if let Some(old_inner) = old_content {
             assert_eq!(old_inner, content);
