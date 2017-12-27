@@ -25,6 +25,14 @@ fn save_file(path: &PathBuf, couter: &u32, current: &Hash) {
     save_file_disk(file_path.as_path(), &current.to_hex().as_bytes()).unwrap();
 }
 
+fn get_count_from_path(path: &PathBuf) -> u32 {
+    let file_name = path.file_name().unwrap().to_str().unwrap();
+    let last_chunk = file_name.split("_").last().unwrap();
+    let count = last_chunk.split(".").nth(0).unwrap();
+
+    u32::from_str_radix(count, 10).unwrap()
+}
+
 #[derive(Clone)]
 pub struct FileSystemHead {
     path: PathBuf,
@@ -55,23 +63,30 @@ impl FileSystemHead {
             FileSystemHead::new_from(path, head_empty_dir, couter)
         } else {
 
-                                                            //TODO - tymczasowe
-            if list.len() == 1 {
-                let last = list[0].clone();
-                println!("LAST {:?}", last);
+            let mut last: Option<(u32, PathBuf)> = None;
 
-                let content = get_file(last.as_path()).unwrap();
-                let read_hash = Hash::from_string_bytes(&content);
-
-                return FileSystemHead::new_from(path, read_hash, 1);
+            for item in list {
+                let counter = get_count_from_path(&item);
+                
+                last = match last {
+                    None => Some((counter, item)),
+                    Some((prev_counter, prev_path)) => {
+                        if counter > prev_counter {
+                            Some((counter, item))
+                        } else {
+                            Some((prev_counter, prev_path))
+                        }
+                    }
+                };
             }
 
-            //odczytaj pierwszego hasha ...
-            println!("lista plików {:?}", list);
+            let (last_count, last_path) = last.unwrap();
 
-            panic!("TODO");
-            //weź najstarczy i wyciągnij hash-a oraz numer kolejny
-            panic!("TODO");
+            let head_hash_content = get_file(&last_path.as_path()).unwrap();
+
+            let head_hash = Hash::from_string_bytes(&head_hash_content);
+
+            FileSystemHead::new_from(path, head_hash, last_count)
         }
     }
 
@@ -85,8 +100,14 @@ impl FileSystemHead {
 
         let current_head = self.current_head();
 
+                                            //Zmienił się head w czasie od ostatniego pobrania
         if prev_head != current_head {
             return Err(());
+        }
+
+                                            //Niepotrzebna aktualizacja
+        if current_head == next_head {
+            return Ok(());
         }
 
         let next_counter = *counter + 1;
