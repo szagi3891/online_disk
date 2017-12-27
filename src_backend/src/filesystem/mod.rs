@@ -10,6 +10,8 @@ use filesystem::head::FileSystemHead;
 use filesystem::data::FileSystemData;
 use filesystem::blob::key_value::BlobKeyValue;
 use filesystem::blob::fs::FsIo;
+use filesystem::utils::hash::Hash;
+use filesystem::data::GetResult;
 
 fn create_sub_path(path: &Path, sub_dir: &str) -> PathBuf {
     let mut path_buf = path.to_path_buf();
@@ -49,25 +51,40 @@ impl FileSystem {
         }
     }
 
+    pub fn get_node(&self, node: &Hash) -> Option<GetResult> {
+        self.data.get(node)
+    }
+
+    pub fn add(&self, mut target_path: Vec<String>, target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
+        loop {
+            let head = self.head.current_head();
+
+            match self.data.add(&head, (&mut target_path, target_hash), name, content.clone()) {
+                Some(new_head) => {
+                    if let Ok(_) = self.head.replace(head, new_head) {
+                        return Ok(());
+                    }
+                },
+                None => {
+                    return Err(());
+                }
+            }
+        }
+    }
+
+    pub fn put_content(&self, data: &[u8]) -> Hash {
+        self.data.put_content(data)
+    }
+
     /*
-    Todo: do zaimplementowania wewnętrzne metody head
-
-    self.head.replace(prev_head, next_head);
-    self.head.current_head();
-
-
     Publiczne metody które będzie udostępniała ta struktura:
 
-    1)
-    pub fn get_dir(&self, node: &Hash) -> FileSystemDir
+    0)
+    pub fn put_content(&self, data: &[u8]) -> Hash
     
     2)
     pub fn update(&self, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Result<(), ()>
         --> current_head + pub fn update(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash>
-
-    3)
-    pub fn add(&self, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Result<(), ()>
-        --> current_head + pub fn add(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash>
 
     4)
     pub fn remove(&self, target: (&mut Vec<String>, Hash), name: &String) -> Result<(), ()>
