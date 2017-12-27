@@ -37,11 +37,11 @@ impl<T: KeyValue> FileSystemData<T> {
     }
 
     fn get_dir(&self, node: &Hash) -> FileSystemDir {
-        let node_content = self.key_value.get_blob(&node).unwrap();         //TODO - pozbyć się unwrap
+        let node_content = self.key_value.get_blob(&node).unwrap();
         FileSystemDir::from_blob(&node_content).unwrap()
     }
 
-    pub fn get(&self, node: &Hash) -> Option<GetResult> {
+    fn get_node(&self, node: &Hash) -> Option<GetResult> {
         if let Some(node_content) = self.key_value.get_blob(node) {
 
             if let Ok(dir) = FileSystemDir::from_blob(&node_content) {
@@ -54,6 +54,21 @@ impl<T: KeyValue> FileSystemData<T> {
         }
 
         None
+    }
+
+    pub fn get(&self, node: &Hash, target_path: &[String], target_node: &Hash) -> Option<GetResult> {
+        if let Some((target_path_head, target_path_rest)) = target_path.split_first() {
+            let mut node_dir = self.get_dir(&target_node);
+            let next_node = node_dir.get_child(&target_path_head);
+
+            self.get(&next_node, target_path_rest, target_node)
+        } else {
+            if *target_node == *node {
+                self.get_node(target_node)
+            } else {
+                None
+            }
+        }
     }
 
     pub fn put_content(&self, data: &[u8]) -> Hash {

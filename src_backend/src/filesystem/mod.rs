@@ -51,8 +51,13 @@ impl FileSystem {
         }
     }
 
-    pub fn get_node(&self, node: &Hash) -> Option<GetResult> {
-        self.data.get(node)
+    pub fn current_head(&self) -> Hash {
+        self.head.current_head()
+    }
+
+    pub fn get_node(&self, target_path: &[String], target_hash: &Hash) -> Option<GetResult> {
+        let head = self.head.current_head();
+        self.data.get(&head, target_path, target_hash)
     }
 
     pub fn add(&self, mut target_path: Vec<String>, target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
@@ -93,5 +98,7 @@ impl FileSystem {
     5)
     pub fn rename(&self, target: (&mut Vec<String>, Hash), old_name: &String, new_name: &String) -> Result<(), ()>
         --> current_head + pub fn rename(&self, node: Hash, target: (&mut Vec<String>, Hash), old_name: &String, new_name: &String) -> Option<Hash>
+
+    Trzeba poprawić serializowanie hash-a do foramtu "a1a1aa111aa1"
     */
 }
