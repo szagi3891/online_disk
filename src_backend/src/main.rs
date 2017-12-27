@@ -29,7 +29,7 @@ fn main() {
 
         let fs = filesystem::FileSystem::new(Path::new(root_path.as_str()));
 
-        let content_hash = fs.put_content(&"bla bla bla bla 2111".as_bytes());
+        let content_hash = fs.create_file(&"bla bla bla bla 2111".as_bytes());
 
         fs.add(&Vec::new(), &fs.current_head(), &"jakis plik".into(), &content_hash).unwrap();
 

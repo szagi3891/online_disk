@@ -71,8 +71,14 @@ impl<T: KeyValue> FileSystemData<T> {
         }
     }
 
-    pub fn put_content(&self, data: &[u8]) -> Hash {
-        self.key_value.set_blob(data)
+    pub fn create_file(&self, data: &[u8]) -> Hash {
+        let file = FileSystemFile::new_from_slice(data);
+        self.key_value.set_blob(&file.to_blob())
+    }
+
+    pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {
+        let dir = FileSystemDir::new(data);
+        self.key_value.set_blob(&dir.to_blob())
     }
 
     fn modify_node<TF>(&self, node: &Hash, target: (&[String], &Hash), modify_node_f: TF) -> Option<Hash>

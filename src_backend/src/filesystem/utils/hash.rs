@@ -16,22 +16,6 @@ impl Hash {
             hash: hash
         }
     }
-    /*
-                                                                //TODO zmienić potem nazwę na from_bytes
-    pub fn from_bytes(hash: &[u8]) -> Hash {
-        
-        if hash.len() != 20 {
-            panic!("nieprawidłowa długość {:?}", hash.len());
-        }
-        
-        let mut out = [0; 20];
-        out.copy_from_slice(hash);
-        
-        Hash {
-            hash: out
-        }
-    }
-    */
 
     pub fn add_to_path(&self, path: &mut PathBuf) {        
         let slice = &self.hash[..];

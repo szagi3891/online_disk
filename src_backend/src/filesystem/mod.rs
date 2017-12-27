@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 use std::fs::create_dir_all;
+use std::collections::HashMap;
 
 mod blob;
 pub mod data;
@@ -55,16 +56,24 @@ impl FileSystem {
         self.head.current_head()
     }
 
+    pub fn create_file(&self, data: &[u8]) -> Hash {
+        self.data.create_file(data)
+    }
+
+    pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {
+        self.data.create_dir(data)
+    }
+
     pub fn get_node(&self, target_path: &[String], target_hash: &Hash) -> Option<GetResult> {
         let head = self.head.current_head();
         self.data.get(&head, target_path, target_hash)
     }
 
-    pub fn add(&self, mut target_path: &[String], target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
+    pub fn add(&self, target_path: &[String], target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
         loop {
             let head = self.head.current_head();
 
-            match self.data.add(&head, (&mut target_path, target_hash), name, content.clone()) {
+            match self.data.add(&head, (target_path, target_hash), name, content.clone()) {
                 Some(new_head) => {
                     if let Ok(_) = self.head.replace(head, new_head) {
                         return Ok(());
@@ -77,28 +86,54 @@ impl FileSystem {
         }
     }
 
-    pub fn put_content(&self, data: &[u8]) -> Hash {
-        self.data.put_content(data)
+    pub fn update(&self, target_path: &[String], target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
+        loop {
+            let head = self.head.current_head();
+
+            match self.data.update(&head, (target_path, target_hash), name, content.clone()) {
+                Some(new_head) => {
+                    if let Ok(_) = self.head.replace(head, new_head) {
+                        return Ok(());
+                    }
+                },
+                None => {
+                    return Err(());
+                }
+            }
+        }
     }
 
-    /*
-    Publiczne metody które będzie udostępniała ta struktura:
+    pub fn remove(&self, target_path: &[String], target_hash: &Hash, name: &String) -> Result<(), ()> {
+        loop {
+            let head = self.head.current_head();
 
-    0)
-    pub fn put_content(&self, data: &[u8]) -> Hash
-    
-    2)
-    pub fn update(&self, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Result<(), ()>
-        --> current_head + pub fn update(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String, new_content: Hash) -> Option<Hash>
+            match self.data.remove(&head, (target_path, target_hash), name) {
+                Some(new_head) => {
+                    if let Ok(_) = self.head.replace(head, new_head) {
+                        return Ok(());
+                    }
+                },
+                None => {
+                    return Err(());
+                }
+            }
+        }
+    }
 
-    4)
-    pub fn remove(&self, target: (&mut Vec<String>, Hash), name: &String) -> Result<(), ()>
-        --> current_head + pub fn remove(&self, node: Hash, target: (&mut Vec<String>, Hash), name: &String) -> Option<Hash>
+    pub fn rename(&self, target_path: &[String], target_hash: &Hash, old_name: &String, new_name: &String) -> Result<(), ()> {
+        loop {
+            let head = self.head.current_head();
 
-    5)
-    pub fn rename(&self, target: (&mut Vec<String>, Hash), old_name: &String, new_name: &String) -> Result<(), ()>
-        --> current_head + pub fn rename(&self, node: Hash, target: (&mut Vec<String>, Hash), old_name: &String, new_name: &String) -> Option<Hash>
-
-    Trzeba poprawić serializowanie hash-a do foramtu "a1a1aa111aa1"
-    */
+            match self.data.rename(&head, (target_path, target_hash), old_name, new_name) {
+                Some(new_head) => {
+                    if let Ok(_) = self.head.replace(head, new_head) {
+                        return Ok(());
+                    }
+                },
+                None => {
+                    return Err(());
+                }
+            }
+        }
+    }
 }
