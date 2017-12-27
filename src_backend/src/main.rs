@@ -31,7 +31,7 @@ fn main() {
 
         let content_hash = fs.put_content(&"bla bla bla bla 2111".as_bytes());
 
-        fs.add(Vec::new(), &fs.current_head(), &"jakis plik".into(), &content_hash).unwrap();
+        fs.add(&Vec::new(), &fs.current_head(), &"jakis plik".into(), &content_hash).unwrap();
 
         //FileSystem::new()
 

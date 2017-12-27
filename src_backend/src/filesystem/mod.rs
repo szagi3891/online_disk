@@ -60,7 +60,7 @@ impl FileSystem {
         self.data.get(&head, target_path, target_hash)
     }
 
-    pub fn add(&self, mut target_path: Vec<String>, target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
+    pub fn add(&self, mut target_path: &[String], target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
         loop {
             let head = self.head.current_head();
 
