@@ -5,6 +5,7 @@ https://github.com/rust-lang-nursery/rls
 https://github.com/rust-lang-nursery/rls-vscode
 
 
+to poniżej w przypadku gdy coś nie chce działać
 rustup default nightly-2017-11-19
 rustup component add rust-src --toolchain nightly-2017-11-19
 rustup component add rust-analysis --toolchain nightly-2017-11-19
@@ -21,3 +22,5 @@ rustup component add rls-preview --toolchain nightly-2017-11-19
     "rust-client.channel": "nightly-2017-11-19"
 }
 
+    "rust-client.channel": "nightly-2017-11-19",
+    "rust.cfg_test": true
