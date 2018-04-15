@@ -8,7 +8,7 @@ export class App extends React.Component<PropsType> {
     render(): React.Node {
         return (
             <div>
-                To jest App
+                To jest główny komponent
             </div>
         );
     }

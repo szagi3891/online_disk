@@ -13,19 +13,19 @@ use std::env;
 use std::path::Path;
 
 mod filesystem;
-mod server_template;
 mod server;
 
-use server::start_server;
+use server::server::start_server;
 
 fn main() {
-    println!("Hello, world!");
+    println!("Czytam parametry wejściowe");
 
-    if let Some(root_path) = env::args().nth(1) {
-        println!("The first argument is {}", &root_path);
-
-        start_server(Path::new(root_path.as_str()));
+    if let (Some(root_path), Some(static_path)) = (env::args().nth(1), env::args().nth(2)) {
+        start_server(
+            Path::new(root_path.as_str()),
+            Path::new(static_path.as_str())
+        );
     } else {
-        panic!("Brak parametru");       //TODO
+        panic!("Niewłaściwe parametry wejściowe");
     }
 }

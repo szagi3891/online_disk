@@ -6,7 +6,7 @@ use futures::future::Future;
 use hyper;
 use hyper::Client;
 use hyper::server::{Request, Response};
-use server_template::{ServerBase, ServerBaseExtend, Context};
+use server::server_template::{ServerBase, ServerBaseExtend, Context};
 
 #[derive(Clone)]
 struct Server {
@@ -23,9 +23,11 @@ impl ServerBaseExtend for Server {
     }
 }
 
-pub fn start_server(data_path: &Path) {
+pub fn start_server(data_path: &Path, static_path: &Path) {
 
-    let fs = FileSystem::new(data_path);
+    println!("Static path {:?}", static_path);
+
+    //let fs = FileSystem::new(data_path);
 
     let addr = "127.0.0.1:7777";
     let srv_addr = addr.parse().unwrap();
