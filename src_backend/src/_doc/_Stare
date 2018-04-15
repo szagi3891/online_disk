@@ -1,0 +1,11 @@
+
+fn head_vec<T>(list: &mut Vec<T>) -> Option<T> {
+    if list.len() < 1 {
+        return None
+    }
+
+    let body = list.split_off(1);
+    let head = list.pop();
+    *list = body;
+    head
+}

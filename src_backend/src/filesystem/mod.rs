@@ -52,6 +52,21 @@ impl FileSystem {
         }
     }
 
+    fn try_replace_head(&self, head: Hash, new_head: Option<Hash>) -> Option<Result<(), ()>> {
+        match new_head {
+            Some(new_head) => {
+                if let Ok(_) = self.head.replace(head, new_head) {
+                    return Some(Ok(()));
+                }
+
+                None
+            },
+            None => {
+                return Some(Err(()));
+            }
+        }
+    }
+
     pub fn current_head(&self) -> Hash {
         self.head.current_head()
     }
@@ -72,16 +87,9 @@ impl FileSystem {
     pub fn add(&self, target_path: &[String], target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
         loop {
             let head = self.head.current_head();
-
-            match self.data.add(&head, (target_path, target_hash), name, content.clone()) {
-                Some(new_head) => {
-                    if let Ok(_) = self.head.replace(head, new_head) {
-                        return Ok(());
-                    }
-                },
-                None => {
-                    return Err(());
-                }
+            let new_head = self.data.add(&head, (target_path, target_hash), name, content.clone());
+            if let Some(result) = self.try_replace_head(head, new_head) {
+                return result;
             }
         }
     }
@@ -89,16 +97,9 @@ impl FileSystem {
     pub fn update(&self, target_path: &[String], target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {
         loop {
             let head = self.head.current_head();
-
-            match self.data.update(&head, (target_path, target_hash), name, content.clone()) {
-                Some(new_head) => {
-                    if let Ok(_) = self.head.replace(head, new_head) {
-                        return Ok(());
-                    }
-                },
-                None => {
-                    return Err(());
-                }
+            let new_head = self.data.update(&head, (target_path, target_hash), name, content.clone());
+            if let Some(result) = self.try_replace_head(head, new_head) {
+                return result;
             }
         }
     }
@@ -106,16 +107,9 @@ impl FileSystem {
     pub fn remove(&self, target_path: &[String], target_hash: &Hash, name: &String) -> Result<(), ()> {
         loop {
             let head = self.head.current_head();
-
-            match self.data.remove(&head, (target_path, target_hash), name) {
-                Some(new_head) => {
-                    if let Ok(_) = self.head.replace(head, new_head) {
-                        return Ok(());
-                    }
-                },
-                None => {
-                    return Err(());
-                }
+            let head_new = self.data.remove(&head, (target_path, target_hash), name);
+            if let Some(result) = self.try_replace_head(head, head_new) {
+                return result;
             }
         }
     }
@@ -123,16 +117,9 @@ impl FileSystem {
     pub fn rename(&self, target_path: &[String], target_hash: &Hash, old_name: &String, new_name: &String) -> Result<(), ()> {
         loop {
             let head = self.head.current_head();
-
-            match self.data.rename(&head, (target_path, target_hash), old_name, new_name) {
-                Some(new_head) => {
-                    if let Ok(_) = self.head.replace(head, new_head) {
-                        return Ok(());
-                    }
-                },
-                None => {
-                    return Err(());
-                }
+            let head_new = self.data.rename(&head, (target_path, target_hash), old_name, new_name);
+            if let Some(result) = self.try_replace_head(head, head_new) {
+                return result;
             }
         }
     }

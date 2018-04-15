@@ -8,17 +8,6 @@ mod file;
 use self::dir::FileSystemDir;
 use self::file::FileSystemFile;
 
-fn head_vec<T>(list: &mut Vec<T>) -> Option<T> {
-    if list.len() < 1 {
-        return None
-    }
-
-    let body = list.split_off(1);
-    let head = list.pop();
-    *list = body;
-    head
-}
-
 pub enum GetResult {
     File(Vec<u8>),
     Dir(HashMap<String, Hash>),
@@ -71,16 +60,6 @@ impl<T: KeyValue> FileSystemData<T> {
         }
     }
 
-    pub fn create_file(&self, data: &[u8]) -> Hash {
-        let file = FileSystemFile::new_from_slice(data);
-        self.key_value.set_blob(&file.to_blob())
-    }
-
-    pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {
-        let dir = FileSystemDir::new(data);
-        self.key_value.set_blob(&dir.to_blob())
-    }
-
     fn modify_node<TF>(&self, node: &Hash, target: (&[String], &Hash), modify_node_f: TF) -> Option<Hash>
         where TF : FnOnce(FileSystemDir) -> FileSystemDir {
         let (target_path, target_node) = target;
@@ -103,6 +82,16 @@ impl<T: KeyValue> FileSystemData<T> {
                 None
             }
         }
+    }
+
+    pub fn create_file(&self, data: &[u8]) -> Hash {
+        let file = FileSystemFile::new_from_slice(data);
+        self.key_value.set_blob(&file.to_blob())
+    }
+
+    pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {
+        let dir = FileSystemDir::new(data);
+        self.key_value.set_blob(&dir.to_blob())
     }
 
     pub fn update(&self, node: &Hash, target: (&[String], &Hash), name: &String, new_content: Hash) -> Option<Hash> {
