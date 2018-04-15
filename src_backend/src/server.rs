@@ -36,7 +36,6 @@ pub fn start_server(data_path: &Path) {
 
     /*
     let content_hash = fs.create_file(&"bla bla bla bla 2111".as_bytes());
-
     fs.add(&Vec::new(), &fs.current_head(), &"jakis plikads".into(), &content_hash).unwrap();
     */
 }

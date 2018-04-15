@@ -75,6 +75,8 @@ impl FileSystem {
         self.data.create_file(data)
     }
 
+    /*
+    //TODO - do przywrócenia
     pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {
         self.data.create_dir(data)
     }
@@ -103,6 +105,7 @@ impl FileSystem {
             }
         }
     }
+    */
 
     pub fn remove(&self, target_path: &[String], target_hash: &Hash, name: &String) -> Result<(), ()> {
         loop {

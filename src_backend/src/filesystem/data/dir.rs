@@ -2,26 +2,27 @@ use std::collections::HashMap;
 use serde_json;
 
 use filesystem::utils::hash::Hash;
+use filesystem::data::node::FileSystemNode;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FileSystemDir {
-    files: HashMap<String, Hash>,
+    files: HashMap<String, FileSystemNode>,
 }
 
 impl FileSystemDir {
 
-    pub fn new(data: HashMap<String, Hash>) -> FileSystemDir {
+    pub fn new(data: HashMap<String, FileSystemNode>) -> FileSystemDir {
         FileSystemDir {
             files: data
         }
     }
 
-    pub fn to_hashmap(self) -> HashMap<String, Hash> {
+    fn to_hashmap(self) -> HashMap<String, FileSystemNode> {
         self.files
     }
 
     pub fn from_blob(content: &[u8]) -> Result<FileSystemDir, ()> {
-        let files: HashMap<String, Hash> = serde_json::from_slice(content).unwrap();
+        let files: HashMap<String, FileSystemNode> = serde_json::from_slice(content).unwrap();
 
         Ok(FileSystemDir {
             files: files
@@ -32,15 +33,15 @@ impl FileSystemDir {
         serde_json::to_vec(&self.files).unwrap()
     }
 
-    pub fn set_child(&mut self, subdir: &String, target: Hash) {
-        self.files.insert(subdir.clone(), target);
+    pub fn set_child(&mut self, subdir: &String, node: Hash) {
+        self.files.insert(subdir.clone(), FileSystemNode::newDir(node));
     }
 
-    pub fn get_child(&self, subdir: &String) -> Hash {
-        self.files.get(subdir).unwrap().clone()
+    pub fn get_child(&self, subdir: &String) -> FileSystemNode {
+        (*(self.files.get(subdir).unwrap())).clone()
     }
 
-    pub fn add_child(&mut self, new_subdir: &String, content: Hash) {
+    pub fn add_child(&mut self, new_subdir: &String, content: FileSystemNode) {
         assert_eq!(self.files.insert(new_subdir.clone(), content), None);
     }
 

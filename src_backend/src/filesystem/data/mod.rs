@@ -4,9 +4,11 @@ use std::collections::HashMap;
 
 mod dir;
 mod file;
+mod node;
 
 use self::dir::FileSystemDir;
 use self::file::FileSystemFile;
+use filesystem::data::node::FileSystemNode;
 
 pub enum GetResult {
     File(Vec<u8>),
@@ -30,6 +32,8 @@ impl<T: KeyValue> FileSystemData<T> {
         FileSystemDir::from_blob(&node_content).unwrap()
     }
 
+    //TODO - do przywrócenia
+    /*
     fn get_node(&self, node: &Hash) -> Option<GetResult> {
         if let Some(node_content) = self.key_value.get_blob(node) {
 
@@ -59,6 +63,7 @@ impl<T: KeyValue> FileSystemData<T> {
             }
         }
     }
+    */
 
     fn modify_node<TF>(&self, node: &Hash, target: (&[String], &Hash), modify_node_f: TF) -> Option<Hash>
         where TF : FnOnce(FileSystemDir) -> FileSystemDir {
@@ -68,20 +73,24 @@ impl<T: KeyValue> FileSystemData<T> {
             let mut node_dir = self.get_dir(&node);
             let next_node = node_dir.get_child(&target_path_head);
 
-            self.modify_node(&next_node, (target_path_rest, target_node), modify_node_f)
-                .map(move |new_node_hash| {
-                    node_dir.set_child(&target_path_head, new_node_hash);
-                    self.key_value.set_blob(&node_dir.to_blob())
-                })
-        
-        } else {
-            if *target_node == *node {
-                let node_dir = modify_node_f(self.get_dir(&node));
-                Some(self.key_value.set_blob(&node_dir.to_blob()))
+            if next_node.isDir {
+                return self.modify_node(&next_node.hash, (target_path_rest, target_node), modify_node_f)
+                    .map(move |new_node| {
+                        node_dir.set_child(&target_path_head, new_node);
+                        self.key_value.set_blob(&node_dir.to_blob())
+                    })
             } else {
-                None
-            }
+                panic!("Spodziewano się katalogu");
+            }        
         }
+
+        if *target_node == *node {
+            let node_dir = modify_node_f(self.get_dir(&node));
+            let new_hash = self.key_value.set_blob(&node_dir.to_blob());
+            return Some(new_hash);
+        }
+
+        None
     }
 
     pub fn create_file(&self, data: &[u8]) -> Hash {
@@ -89,11 +98,16 @@ impl<T: KeyValue> FileSystemData<T> {
         self.key_value.set_blob(file.ref_data())
     }
 
+    //TODO - do przywrócenia
+    /*
     pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {
         let dir = FileSystemDir::new(data);
         self.key_value.set_blob(&dir.to_blob())
     }
+    */
 
+    //TODO - do przywrócenia
+    /*
     pub fn update(&self, node: &Hash, target: (&[String], &Hash), name: &String, new_content: Hash) -> Option<Hash> {
         self.modify_node(node, target, |mut node_dir: FileSystemDir| {
             node_dir.set_child(name, new_content);
@@ -107,6 +121,7 @@ impl<T: KeyValue> FileSystemData<T> {
             node_dir
         })
     }
+    */
 
     pub fn remove(&self, node: &Hash, target: (&[String], &Hash), name: &String) -> Option<Hash> {
         self.modify_node(node, target, |mut node_dir: FileSystemDir| {
