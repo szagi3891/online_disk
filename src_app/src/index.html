@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Radio WM</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <link data-autorun="js-nocache" href="./index.js" />
+        <script type="text/javascript">
+            /*
+          (function() {
+              var isRun = false;
+              addEvent(window, 'load', run);
+              setTimeout(run, 3000);
+              function run() {
+                  if (isRun) {
+                      return;
+                  }
+                  isRun = true;
+                  const list = [].slice.call(document.querySelectorAll('*[data-autorun]'));
+                  for (var i = 0; i < list.length; i++) {
+                      runItem(list[i].getAttribute('data-autorun'), list[i].getAttribute('href'));
+                  }
+              }
+              function runItem(mode, src) {
+                  if (mode === 'js-nocache') {
+                    loadScript(src + '?random=' + new Date().getTime());
+                  } else if (mode === 'js') {
+                    loadScript(src);
+                  }
+              }
+              function loadScript(src) {
+                  var script = document.createElement('script');
+                  script.setAttribute('type', 'text/javascript');
+                  script.setAttribute('src', src);
+                  document.head.appendChild(script);
+              }
+              function addEvent(element, event, callback) {
+                  if (element.addEventListener) {
+                      element.addEventListener(event, callback, false);
+                  } else {
+                      element.attachEvent('on' + event, callback);
+                  }
+              }
+          })();
+          */
+      </script>
+      <style>
+          body {
+              margin: 0;
+              pargin: 0;
+          }
+      </style>
+    </head>
+    <body>
+        <noscript>
+            You need to enable JavaScript to run this app.
+        </noscript>
+        <div id="root"></div>
+        <script type="text/javascript" src="./index.js"></script>
+    </body>
+</html>
