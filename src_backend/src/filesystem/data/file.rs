@@ -3,10 +3,7 @@ pub struct FileSystemFile {
     data: Vec<u8>,
 }
 
-const CODE_FORMAT: u8 = 100;       //'d'
-
 impl FileSystemFile {
-
     pub fn new_from_slice(data: &[u8]) -> FileSystemFile {
         let mut data_vec: Vec<u8> = Vec::new();
         data_vec.extend_from_slice(data);
@@ -21,26 +18,15 @@ impl FileSystemFile {
     }
 
     pub fn from_blob(content: &[u8]) -> Result<FileSystemFile, ()> {
+        let mut data: Vec<u8> = Vec::new();
+        data.extend_from_slice(content);
 
-        if let Some((head, body)) = content.split_first() {
-            if *head != CODE_FORMAT {
-                return Err(());
-            }
-
-            let mut data: Vec<u8> = Vec::new();
-            data.extend_from_slice(body);
-
-            return Ok(FileSystemFile {
-                data: data
-            });
-        }
-
-        Err(())
+        Ok(FileSystemFile {
+            data: data
+        })
     }
 
-    pub fn to_blob(&self) -> Vec<u8> {
-        let mut out = vec!(CODE_FORMAT);
-        out.extend_from_slice(&self.data);
-        out
+    pub fn ref_data<'a>(&'a self) -> &'a Vec<u8> {
+        &self.data
     }
 }

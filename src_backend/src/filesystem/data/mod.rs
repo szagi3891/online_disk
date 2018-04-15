@@ -86,7 +86,7 @@ impl<T: KeyValue> FileSystemData<T> {
 
     pub fn create_file(&self, data: &[u8]) -> Hash {
         let file = FileSystemFile::new_from_slice(data);
-        self.key_value.set_blob(&file.to_blob())
+        self.key_value.set_blob(file.ref_data())
     }
 
     pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {

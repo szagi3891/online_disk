@@ -3,8 +3,6 @@ use serde_json;
 
 use filesystem::utils::hash::Hash;
 
-const CODE_FORMAT: u8 = 102;       //'f'
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FileSystemDir {
     files: HashMap<String, Hash>,
@@ -23,27 +21,15 @@ impl FileSystemDir {
     }
 
     pub fn from_blob(content: &[u8]) -> Result<FileSystemDir, ()> {
+        let files: HashMap<String, Hash> = serde_json::from_slice(content).unwrap();
 
-        if let Some((head, body)) = content.split_first() {
-            if *head != CODE_FORMAT {
-                return Err(());
-            }
-
-            let files: HashMap<String, Hash> = serde_json::from_slice(body).unwrap();
-
-            return Ok(FileSystemDir {
-                files: files
-            });
-        }
-
-        Err(())
+        Ok(FileSystemDir {
+            files: files
+        })
     }
 
     pub fn to_blob(&self) -> Vec<u8> {
-        let mut json = serde_json::to_vec(&self.files).unwrap();
-        let mut out = vec!(CODE_FORMAT);
-        out.append(&mut json);
-        out
+        serde_json::to_vec(&self.files).unwrap()
     }
 
     pub fn set_child(&mut self, subdir: &String, target: Hash) {
