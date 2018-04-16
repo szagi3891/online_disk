@@ -1,1 +1,1 @@
-parcel build ./src/index.html --public-url ./ --detailed-report
+parcel build ./src/index.html --public-url ./static --detailed-report

@@ -11,6 +11,7 @@ use futures::stream::Stream;
 use tokio_core::reactor::Handle as TokioHandle;
 use tokio_core::net::TcpListener;
 use tokio_core::reactor::Core;
+use tokio_core::reactor::Handle;
 
 pub struct Context {
     pub tokio_handle: TokioHandle,
@@ -42,12 +43,13 @@ impl<T: ServerBaseExtend> Service for ServerBase<T> {
 }
 
 impl<T: ServerBaseExtend + Clone + 'static> ServerBase<T> {
-    pub fn run(srv_addr: SocketAddr, inner: T) {
+    pub fn run<FBuild>(srv_addr: SocketAddr, build: FBuild) where FBuild: Fn(&Handle) -> T {
         let cpu_pool = CpuPool::new_num_cpus();
 
         let http = Http::new();
         let mut core = Core::new().unwrap();
         let handle = core.handle();
+        let inner = build(&handle);
 
         let listener = TcpListener::bind(&srv_addr, &handle).unwrap();
         let server = listener
