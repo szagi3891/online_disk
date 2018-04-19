@@ -3,14 +3,21 @@ pub mod utils;
 use std::path::{Path, PathBuf};
 //use filesystem::FileSystem;
 
-use futures;
-use futures::future::Future;
-use hyper::{self, Method, StatusCode};
-use hyper::server::{Request, Response};
+use futures::{
+    self,
+    future::Future
+};
+use hyper::{
+    self,
+    Method,
+    server::{
+        Request,
+        Response
+    }
+};
 use server::utils::{
     static_file::StaticFile,
     match_str,
-    set_header::set_header,
     server::{
         ServerTrait,
         Server
@@ -30,38 +37,12 @@ impl ServerTrait for ServerApp {
             let req_path = req.path();
 
             if req_path == "/" {
-                let index_result = self.static_file.to_response("index.html");
-
-                match index_result {
-                    Ok(mut response) => {
-                        println!("OK...");
-                        set_header(&mut response, "index.html");
-                        return Box::new(futures::future::ok(response));
-                    },
-                    Err(_err) => {
-                        println!("OK... {:?}", _err);
-
-                        let mut resp = Response::new()
-                            .with_status(StatusCode::NotFound);
-                        return Box::new(futures::future::ok(resp));
-                    }
-                }
+                return self.static_file.send_file("index.html");
             }
 
             if let Some(rest) = match_str::match_str(req_path, "/static/") {
-                match self.static_file.to_response(rest) {
-                    Ok(mut response) => {
-                        set_header(&mut response, rest);
-                        return Box::new(futures::future::ok(response));
-                    },
-                    Err(_err) => {
-                        let mut resp = Response::new()
-                            .with_status(StatusCode::NotFound);
-                        return Box::new(futures::future::ok(resp));
-                    }
-                }
+                return self.static_file.send_file(rest);
             }
-            // static
         }
 
         let mut response = Response::new();

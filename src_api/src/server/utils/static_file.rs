@@ -5,9 +5,9 @@ use std::fs::File;
 use std::io::Error;
 use tokio_core::reactor::Handle;
 use futures_cpupool::CpuPool;
-use futures::{Future, Stream, Sink, Poll, Async};
-use hyper::{Chunk, Body};
-
+use futures::{self, Future, Stream, Sink, Poll, Async};
+use hyper::{Chunk, Body, StatusCode};
+use server::utils::set_header::set_header;
 use std::io::{Read};
 use std::{mem};
 
@@ -48,7 +48,7 @@ impl StaticFile {
         }
     }
 
-    pub fn to_response(&self, rest: &str) -> Result<Response, Error> {
+    fn to_response(&self, rest: &str) -> Result<Response, Error> {
         let mut path_buf = self.base_dir.clone();
         path_buf.extend(Path::new(rest));
 
@@ -72,4 +72,26 @@ impl StaticFile {
         res.set_body(body);
         return Ok(res);
     }
+
+
+    pub fn send_file(&self, file_path: &str) -> Box<Future<Item=Response, Error=hyper::Error>> {
+        let index_result = self.to_response(file_path);
+
+        match index_result {
+            Ok(mut response) => {
+                println!("OK...");
+                set_header(&mut response, file_path);
+                return Box::new(futures::future::ok(response));
+            },
+            Err(_err) => {
+                println!("OK... {:?}", _err);
+
+                let mut resp = Response::new()
+                    .with_status(StatusCode::NotFound);
+                return Box::new(futures::future::ok(resp));
+            }
+        }
+
+    }
+
 }

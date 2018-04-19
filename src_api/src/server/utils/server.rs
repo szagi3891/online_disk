@@ -3,7 +3,6 @@ use hyper;
 use hyper::server::{Http, Request, Response, Service};
 
 use std::net::SocketAddr;
-use futures_cpupool::CpuPool;
 
 use futures::Future;
 use futures::stream::Stream;
