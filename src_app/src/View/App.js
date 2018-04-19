@@ -4,6 +4,12 @@ import * as React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 
+import { Store } from '../Store';
+const store = new Store();
+
+type PropsType = {|
+|};
+
 @observer
 export class App extends React.Component<PropsType> {
     @observable _counter: number;
@@ -22,7 +28,12 @@ export class App extends React.Component<PropsType> {
         return (
             <div>
                 To jest główny komponent { this._counter } ...
+                <button onClick={this._getHead}>Pobierz heada</button>
             </div>
         );
+    }
+
+    _getHead = () => {
+        store.getHead();
     }
 }
