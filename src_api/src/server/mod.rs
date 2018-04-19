@@ -1,7 +1,7 @@
 pub mod utils;
 
 use std::path::{Path, PathBuf};
-//use filesystem::FileSystem;
+use filesystem::FileSystem;
 
 use futures::{
     self,
@@ -29,6 +29,7 @@ use futures_cpupool::CpuPool;
 #[derive(Clone)]
 struct ServerApp {
     static_file: StaticFile,
+    filesystem: FileSystem,
 }
 
 impl ServerTrait for ServerApp {
@@ -42,6 +43,23 @@ impl ServerTrait for ServerApp {
 
             if let Some(rest) = match_str::match_str(req_path, "/static/") {
                 return self.static_file.send_file(rest);
+            }
+
+            if let Some(rest) = match_str::match_str(req_path, "/api/") {
+                if rest == "head" {
+                    let body = json!({
+                        "head": self.filesystem.current_head().to_hex()
+                    });
+
+                    return Box::new(futures::future::ok(
+                        hyper::Response::new()
+                            .with_header(hyper::header::ContentType::json())
+                            .with_status(hyper::StatusCode::Ok)
+                            .with_body(body.to_string())
+                    ));
+
+                    //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
+                }
             }
         }
 
@@ -58,9 +76,8 @@ pub fn start_server(data_path: &PathBuf, static_path: &PathBuf) {
         panic!("Oczekiwano absolutnych ścieżek");
     }
 
-    println!("Static path {:?} {:?}", static_path, Path::new(static_path));
-
-    //let fs = FileSystem::new(data_path);
+    let cpu_pool_file = CpuPool::new(16);
+    let filesystem = FileSystem::new(data_path);
 
     let addr = "127.0.0.1:7777";
     let srv_addr = addr.parse().unwrap();
@@ -68,10 +85,13 @@ pub fn start_server(data_path: &PathBuf, static_path: &PathBuf) {
     println!("server start {}", addr);
 
     Server::run(srv_addr, |handle: &Handle| {
-        let cpu_pool_file = CpuPool::new(16);
-
         ServerApp {
-            static_file: StaticFile::new(handle.clone(), Path::new(static_path), cpu_pool_file.clone()),
+            static_file: StaticFile::new(
+                handle.clone(),
+                Path::new(static_path),
+                cpu_pool_file.clone()
+            ),
+            filesystem: filesystem.clone()
         }
     });
 
