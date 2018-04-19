@@ -21,7 +21,7 @@ export class App extends React.Component<PropsType> {
     render(): React.Node {
         return (
             <div>
-                To jest główny komponent { this._counter }
+                To jest główny komponent { this._counter } ...
             </div>
         );
     }

@@ -16,7 +16,7 @@ use std::fs;
 mod filesystem;
 mod server;
 
-use server::server::start_server;
+use server::start_server;
 
 /*
 fn to_absolute(relative: &Path) -> PathBuf { 
