@@ -2,7 +2,7 @@ use filesystem::blob::types::KeyValue;
 use filesystem::utils::hash::Hash;
 use std::collections::HashMap;
 
-mod dir;
+pub mod dir;
 mod file;
 mod node;
 
@@ -10,9 +10,9 @@ use self::dir::FileSystemDir;
 use self::file::FileSystemFile;
 use filesystem::data::node::FileSystemNode;
 
-pub enum GetResult {
-    File(Vec<u8>),
-    Dir(HashMap<String, Hash>),
+enum GetResult {
+    File(FileSystemFile),
+    Dir(FileSystemDir),
 }
 
 #[derive(Clone)]
@@ -27,28 +27,54 @@ impl<T: KeyValue> FileSystemData<T> {
         }
     }
 
-    fn get_dir(&self, node: &Hash) -> FileSystemDir {
-        let node_content = self.key_value.get_blob(&node).unwrap();
-        FileSystemDir::from_blob(&node_content).unwrap()
-    }
-
-    //TODO - do przywrócenia
-    /*
     fn get_node(&self, node: &Hash) -> Option<GetResult> {
         if let Some(node_content) = self.key_value.get_blob(node) {
 
             if let Ok(dir) = FileSystemDir::from_blob(&node_content) {
-                return Some(GetResult::Dir(dir.to_hashmap()));
+                return Some(GetResult::Dir(dir));
             }
 
             if let Ok(file) = FileSystemFile::from_blob(&node_content) {
-                return Some(GetResult::File(file.to_data()));
+                return Some(GetResult::File(file));
             }
         }
 
         None
     }
 
+    fn get_node_dir(&self, node: &Hash) -> Option<FileSystemDir> {
+        if let Some(GetResult::Dir(dir)) = self.get_node(node) {
+            return Some(dir);
+        }
+        None
+    }
+
+    pub fn get_dir(&self, parent: &Hash, target_path: &[String], target_node: &Hash) -> Option<FileSystemDir> {
+        if let Some((target_path_head, target_path_rest)) = target_path.split_first() {
+            if let Some(GetResult::Dir(dir)) = self.get_node(&parent) {
+                let next_node = dir.get_child(&target_path_head);
+
+                return self.get_dir(&next_node.hash, target_path_rest, target_node);
+            } else {
+                panic!("Spodziewano się katalogu");
+            }
+        } else {
+            if *parent == *target_node {
+                if let Some(GetResult::Dir(dir)) = self.get_node(&parent) {
+                    return Some(dir);
+                }
+            }
+
+            None
+        }
+    }
+
+    /*
+
+    */
+
+    //TODO - do przywrócenia
+    /*
     pub fn get(&self, node: &Hash, target_path: &[String], target_node: &Hash) -> Option<GetResult> {
         if let Some((target_path_head, target_path_rest)) = target_path.split_first() {
             let mut node_dir = self.get_dir(&target_node);
@@ -70,7 +96,7 @@ impl<T: KeyValue> FileSystemData<T> {
         let (target_path, target_node) = target;
 
         if let Some((target_path_head, target_path_rest)) = target_path.split_first() {
-            let mut node_dir = self.get_dir(&node);
+            let mut node_dir = self.get_node_dir(&node).unwrap();
             let next_node = node_dir.get_child(&target_path_head);
 
             if next_node.isDir {
@@ -85,7 +111,7 @@ impl<T: KeyValue> FileSystemData<T> {
         }
 
         if *target_node == *node {
-            let node_dir = modify_node_f(self.get_dir(&node));
+            let node_dir = modify_node_f(self.get_node_dir(&node).unwrap());
             let new_hash = self.key_value.set_blob(&node_dir.to_blob());
             return Some(new_hash);
         }

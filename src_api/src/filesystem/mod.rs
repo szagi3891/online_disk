@@ -12,7 +12,7 @@ use filesystem::data::FileSystemData;
 use filesystem::blob::key_value::BlobKeyValue;
 use filesystem::blob::fs::FsIo;
 use filesystem::utils::hash::Hash;
-use filesystem::data::GetResult;
+use filesystem::data::dir::FileSystemDir;
 
 fn create_sub_path(path: &Path, sub_dir: &str) -> PathBuf {
     let mut path_buf = path.to_path_buf();
@@ -75,15 +75,16 @@ impl FileSystem {
         self.data.create_file(data)
     }
 
+
+    pub fn get_dir(&self, target_path: &[String], target_hash: &Hash) -> Option<FileSystemDir> {
+        let head = self.head.current_head();
+        self.data.get_dir(&head, target_path, target_hash)
+    }
+
     /*
     //TODO - do przywrócenia
     pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {
         self.data.create_dir(data)
-    }
-
-    pub fn get_node(&self, target_path: &[String], target_hash: &Hash) -> Option<GetResult> {
-        let head = self.head.current_head();
-        self.data.get(&head, target_path, target_hash)
     }
 
     pub fn add(&self, target_path: &[String], target_hash: &Hash, name: &String, content: &Hash) -> Result<(), ()> {

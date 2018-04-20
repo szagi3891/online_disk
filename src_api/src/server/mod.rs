@@ -61,6 +61,11 @@ impl ServerTrait for ServerApp {
                     //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
                 }
             }
+
+            // /api/node/:hash/dir
+            /*
+                self.filesystem.get_dir(target_path, target_hash)
+            */
         }
 
         let mut response = Response::new();
