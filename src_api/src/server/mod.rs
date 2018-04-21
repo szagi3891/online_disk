@@ -5,12 +5,16 @@ use filesystem::FileSystem;
 
 use futures::{
     self,
+    Stream,
     future::Future
 };
 use hyper::{
     self,
     Method,
+    StatusCode,
+    header::ContentType,
     server::{
+        self,
         Request,
         Response
     }
@@ -25,6 +29,36 @@ use server::utils::{
 };
 use tokio_core::reactor::Handle;
 use futures_cpupool::CpuPool;
+use serde_json::{
+    self,
+    Value
+};
+
+                
+fn response400(body: &'static str) -> Box<Future<Item=Response, Error=hyper::Error>> {
+    let mut response = Response::new();
+    response.set_status(StatusCode::BadRequest);
+    response.set_body(body);
+    return Box::new(futures::future::ok(response));
+}
+
+fn response404(body: &'static str) -> Box<Future<Item=Response, Error=hyper::Error>> {
+    let mut response = Response::new();
+    //response.set_body("<form action='/submit'><input text='data' /></form>");
+    response.set_body("404 ...");
+    Box::new(futures::future::ok(response))
+}
+
+fn response200(body: serde_json::Value) -> Box<Future<Item=Response, Error=hyper::Error>> {
+    Box::new(futures::future::ok(
+        Response::new()
+            .with_header(ContentType::json())
+            .with_status(StatusCode::Ok)
+            .with_body(body.to_string())
+    ))
+
+    //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
+}
 
 #[derive(Clone)]
 struct ServerApp {
@@ -34,32 +68,63 @@ struct ServerApp {
 
 impl ServerTrait for ServerApp {
     fn call(&self, req: Request, _handle: Handle) -> Box<Future<Item=Response, Error=hyper::Error>> {
-        if req.method() == &Method::Get {
-            let req_path = req.path();
+        let (method, uri, _, _headers, body) = req.deconstruct();
 
-            if req_path == "/" {
-                return self.static_file.send_file("index.html");
-            }
+        let methodGet = &method == &Method::Get;
+        let methodPost = &method == &Method::Post;
+        let req_path = uri.path();
 
+        if methodGet && req_path == "/" {
+            return self.static_file.send_file("index.html");
+        }
+
+        if methodGet {
             if let Some(rest) = match_str::match_str(req_path, "/static/") {
                 return self.static_file.send_file(rest);
             }
+        }
 
-            if let Some(rest) = match_str::match_str(req_path, "/api/") {
-                if rest == "head" {
-                    let body = json!({
-                        "head": self.filesystem.current_head().to_hex()
-                    });
+        if let Some(rest) = match_str::match_str(req_path, "/api/") {
+            if methodGet && rest == "head" {
+                return response200(json!({
+                    "head": self.filesystem.current_head().to_hex()
+                }));
+            }
 
-                    return Box::new(futures::future::ok(
-                        hyper::Response::new()
-                            .with_header(hyper::header::ContentType::json())
-                            .with_status(hyper::StatusCode::Ok)
-                            .with_body(body.to_string())
-                    ));
+            if methodPost && rest == "add_dir" {
+                println!("Coś odebrałem");
 
-                    //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
-                }
+                return Box::new(
+                    body
+                        .collect()
+                        .and_then(move |chunk| {
+                            let mut buffer: Vec<u8> = Vec::new();
+                            for i in chunk {
+                                buffer.append(&mut i.to_vec());
+                            }
+                            Ok(buffer)
+                        })
+                        .and_then(move |buffer|{
+
+                            #[derive(Serialize, Deserialize, Debug)]
+                            struct Post {
+                                dir: String,
+                            }
+
+                            let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
+
+                            match result {
+                                Ok(post) => {
+                                    return response200(json!({
+                                        "status": "ok"
+                                    }));
+                                }
+                                Err(_) => {
+                                    return response400("Problem ze zdekodowaniem parametrów /api/add_dir");
+                                }
+                            }
+                        })
+                );
             }
 
             // /api/node/:hash/dir
@@ -68,10 +133,7 @@ impl ServerTrait for ServerApp {
             */
         }
 
-        let mut response = Response::new();
-        //response.set_body("<form action='/submit'><input text='data' /></form>");
-        response.set_body("404 ...");
-        Box::new(futures::future::ok(response))
+        response404("404 ...")
     }
 }
 

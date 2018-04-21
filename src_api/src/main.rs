@@ -1,3 +1,5 @@
+#![feature(type_ascription)]
+
 extern crate crypto;
 extern crate serde;
 #[macro_use]

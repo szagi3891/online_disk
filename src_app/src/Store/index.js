@@ -20,4 +20,14 @@ export class Store {
             console.info('Otrzymano błąd', error);
         })
     }
+
+    @action addDir(dir: string) {
+        const param = {
+            dir
+        };
+        return fetch('/api/add_dir', {
+            method: 'POST',
+            body: JSON.stringify(param)
+        });
+    }
 }

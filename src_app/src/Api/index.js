@@ -5,3 +5,4 @@ export const getHead = (): Promise<string> => {
         .then(response => response.json())
         .then(response => response.head);
 };
+

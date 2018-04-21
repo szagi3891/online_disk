@@ -14,10 +14,13 @@ type PropsType = {|
 export class App extends React.Component<PropsType> {
     @observable _counter: number;
 
+    @observable input_folder: string;
+
     constructor(props: PropsType) {
         super(props);
 
         this._counter = 1;
+        this.input_folder = '';
 
         setInterval(() => {
             this._counter = this._counter + 1;
@@ -26,14 +29,34 @@ export class App extends React.Component<PropsType> {
 
     render(): React.Node {
         return (
-            <div>
-                To jest główny komponent { this._counter } ...
-                <button onClick={this._getHead}>Pobierz heada</button>
-            </div>
+            <React.Fragment>
+                <div>
+                    To jest główny komponent { this._counter } ...
+                    <button onClick={this._getHead}>Pobierz heada</button>
+                </div>
+                <div>
+                    <input value={this.input_folder} onChange={this._onChangeInput} />
+                    <button onClick={this._onClickDodaj}>Dodaj</button>
+                </div>
+            </React.Fragment>
         );
     }
 
     _getHead = () => {
         store.getHead();
+    }
+
+    _onChangeInput = (event: SyntheticEvent<>) => {
+        const { target } = event;
+        if (target instanceof HTMLInputElement) {
+            this.input_folder = target.value;
+        }
+    }
+
+    _onClickDodaj = () => {
+        console.info("Zaczynam dodawać", this.input_folder);
+        store.addDir(this.input_folder).then(() => {
+            console.info("Koniec dodawania");
+        });
     }
 }

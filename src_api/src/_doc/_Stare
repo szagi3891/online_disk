@@ -9,3 +9,35 @@ fn head_vec<T>(list: &mut Vec<T>) -> Option<T> {
     *list = body;
     head
 }
+
+
+
+
+                            /*
+                            if !buffer.is_empty() {
+                                println!("{:#?}", serde_json::from_slice::<Value>(&buffer).unwrap());
+                            }
+                            */
+
+                            //buffer
+
+
+
+                                                    /*
+                        .and_then(move |buffer|{
+                            let mut response = Response::new();
+                            //response.set_body("<form action='/submit'><input text='data' /></form>");
+                            response.set_body(format!("Odczytałem jsona"));
+                            Ok(response)
+                        })
+                        */
+                /*
+                        .and_then(|body| {
+                    let v: Post = serde_json::from_slice(&body).unwrap();
+
+                    let mut response = Response::new();
+                    //response.set_body("<form action='/submit'><input text='data' /></form>");
+                    response.set_body(format!("mam utworzyć katalog {}", v.dir));
+                    return Box::new(Ok(response));
+                }));
+                */
