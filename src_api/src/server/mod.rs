@@ -60,6 +60,19 @@ fn response200(body: serde_json::Value) -> Box<Future<Item=Response, Error=hyper
     //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
 }
 
+struct HeadVersion {
+    //hash
+    //version
+}
+/*
+    Tą strukturę zwracać w odpowiedzi na te requesty
+
+    GET /api/head/
+    POST /api/add_dir
+
+
+*/
+
 #[derive(Clone)]
 struct ServerApp {
     static_file: StaticFile,
@@ -137,21 +150,17 @@ impl ServerTrait for ServerApp {
     }
 }
 
-pub fn start_server(data_path: &PathBuf, static_path: &PathBuf) {
-
+pub fn start_server(data_path: &PathBuf, static_path: &PathBuf, addr: String) {
     if !data_path.is_absolute() || !static_path.is_absolute() {
         panic!("Oczekiwano absolutnych ścieżek");
     }
+    let server_addr = addr.parse().unwrap();
+    println!("server start {}", addr);
 
     let cpu_pool_file = CpuPool::new(16);
     let filesystem = FileSystem::new(data_path);
 
-    let addr = "127.0.0.1:7777";
-    let srv_addr = addr.parse().unwrap();
-    
-    println!("server start {}", addr);
-
-    Server::run(srv_addr, |handle: &Handle| {
+    Server::run(server_addr, |handle: &Handle| {
         ServerApp {
             static_file: StaticFile::new(
                 handle.clone(),

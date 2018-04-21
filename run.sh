@@ -14,4 +14,4 @@ cargo build
 
 echo "Uruchamiam server ...";
 
-RUST_BACKTRACE=1 ./target/debug/online_disk ../../online_disk_data ../src_app/dist
+RUST_BACKTRACE=1 ./target/debug/online_disk ../../online_disk_data ../src_app/dist 127.0.0.1:7777

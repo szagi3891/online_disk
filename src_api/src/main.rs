@@ -35,16 +35,21 @@ fn to_absolute(relative: &Path) -> PathBuf {
 }
 
 fn main() {
-    println!("Czytam parametry wejściowe");
+    let params = (
+        env::args().nth(1),
+        env::args().nth(2),
+        env::args().nth(3)
+    );
 
-    if let (Some(root_path), Some(static_path)) = (env::args().nth(1), env::args().nth(2)) {
+    if let (Some(root_path), Some(static_path), Some(addr)) = params {
         start_server(
             &to_absolute(
                 &Path::new(root_path.as_str())
             ),
             &to_absolute(
                 &Path::new(static_path.as_str())
-            )
+            ),
+            addr
         );
     } else {
         panic!("Niewłaściwe parametry wejściowe");
