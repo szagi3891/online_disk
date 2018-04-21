@@ -60,6 +60,20 @@ fn response200(body: serde_json::Value) -> Box<Future<Item=Response, Error=hyper
     //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
 }
 
+fn getBodyVec(body: hyper::Body) -> Box<Future<Item=Vec<u8>, Error=hyper::Error>> {
+    Box::new(
+        body
+            .collect()
+            .and_then(move |chunk| {
+                let mut buffer: Vec<u8> = Vec::new();
+                for i in chunk {
+                    buffer.append(&mut i.to_vec());
+                }
+                Ok(buffer)
+            })
+    )
+}
+
 struct HeadVersion {
     //hash
     //version
@@ -105,38 +119,34 @@ impl ServerTrait for ServerApp {
             }
 
             if methodPost && rest == "add_dir" {
-                println!("Coś odebrałem");
-
                 return Box::new(
-                    body
-                        .collect()
-                        .and_then(move |chunk| {
-                            let mut buffer: Vec<u8> = Vec::new();
-                            for i in chunk {
-                                buffer.append(&mut i.to_vec());
-                            }
-                            Ok(buffer)
-                        })
-                        .and_then(move |buffer|{
+                    getBodyVec(body).and_then(move |buffer|{
 
-                            #[derive(Serialize, Deserialize, Debug)]
-                            struct Post {
-                                dir: String,
-                            }
+                        #[derive(Serialize, Deserialize, Debug)]
+                        struct Post {
+                            dir: String,
+                        }
 
-                            let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
+                        let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
 
-                            match result {
-                                Ok(post) => {
-                                    return response200(json!({
-                                        "status": "ok"
-                                    }));
-                                }
-                                Err(_) => {
-                                    return response400("Problem ze zdekodowaniem parametrów /api/add_dir");
-                                }
+                        match result {
+                            Ok(post) => {
+                                /*
+                                self.filesystem.create_dir(
+                                    target_node -- czyli head w tym testowym przypadku
+                                    [] - pusta tablice - czyli względem roota nigdzie nie idziemy
+                                    string - nowy katalog do utworzenia w środku
+                                )
+                                */
+                                return response200(json!({
+                                    "status": "ok"
+                                }));
                             }
-                        })
+                            Err(_) => {
+                                return response400("Problem ze zdekodowaniem parametrów /api/add_dir");
+                            }
+                        }
+                    })
                 );
             }
 

@@ -79,13 +79,10 @@ impl StaticFile {
 
         match index_result {
             Ok(mut response) => {
-                println!("OK...");
                 set_header(&mut response, file_path);
                 return Box::new(futures::future::ok(response));
             },
             Err(_err) => {
-                println!("OK... {:?}", _err);
-
                 let mut resp = Response::new()
                     .with_status(StatusCode::NotFound);
                 return Box::new(futures::future::ok(resp));
