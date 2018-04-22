@@ -49,12 +49,24 @@ fn response404(body: &'static str) -> Box<Future<Item=Response, Error=hyper::Err
     Box::new(futures::future::ok(response))
 }
 
-fn response200(body: serde_json::Value) -> Box<Future<Item=Response, Error=hyper::Error>> {
+//TODO - przestarzała
+fn response200_old(body: serde_json::Value) -> Box<Future<Item=Response, Error=hyper::Error>> {
     Box::new(futures::future::ok(
         Response::new()
             .with_header(ContentType::json())
             .with_status(StatusCode::Ok)
             .with_body(body.to_string())
+    ))
+
+    //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
+}
+
+fn response200(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
+    Box::new(futures::future::ok(
+        Response::new()
+            .with_header(ContentType::json())
+            .with_status(StatusCode::Ok)
+            .with_body(body)
     ))
 
     //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
@@ -113,9 +125,16 @@ impl ServerTrait for ServerApp {
 
         if let Some(rest) = match_str::match_str(req_path, "/api/") {
             if methodGet && rest == "head" {
+                return response200(
+                    serde_json::to_string(
+                        &self.filesystem.current_head()
+                    ).unwrap()
+                );
+                /*
                 return response200(json!({
                     "head": self.filesystem.current_head().to_hex()
                 }));
+                */
             }
 
             if methodPost && rest == "add_dir" {
@@ -124,6 +143,8 @@ impl ServerTrait for ServerApp {
 
                         #[derive(Serialize, Deserialize, Debug)]
                         struct Post {
+                            //target_node: node docelowy
+                            //target_path: /path/jakas/adsasdsa
                             dir: String,
                         }
 
@@ -131,6 +152,11 @@ impl ServerTrait for ServerApp {
 
                         match result {
                             Ok(post) => {
+                                //self.filesystem.add_dir(target_path, target_hash, name)
+                                // target_path - --- root - head ...
+                                // target_path [] - pusty slice
+                                //name - nowy katalog do dodania
+
                                 /*
                                 self.filesystem.create_dir(
                                     target_node -- czyli head w tym testowym przypadku
@@ -138,7 +164,7 @@ impl ServerTrait for ServerApp {
                                     string - nowy katalog do utworzenia w środku
                                 )
                                 */
-                                return response200(json!({
+                                return response200_old(json!({
                                     "status": "ok"
                                 }));
                             }

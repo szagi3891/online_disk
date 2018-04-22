@@ -33,19 +33,26 @@ fn get_count_from_path(path: &PathBuf) -> u32 {
     u32::from_str_radix(count, 10).unwrap()
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct CurrentHead { 
+    pub counter: u32,
+    pub head: Hash,
+}
+
 #[derive(Clone)]
 pub struct FileSystemHead {
     path: PathBuf,
-    counter: Arc<RwLock<u32>>,
-    head: Arc<RwLock<Hash>>,
+    inner: Arc<RwLock<CurrentHead>>,
 }
 
 impl FileSystemHead {
     fn new_from(path: PathBuf, head: Hash, counter: u32) -> FileSystemHead {
         FileSystemHead {
             path: path,
-            counter: Arc::new(RwLock::new(counter)),
-            head: Arc::new(RwLock::new(head))
+            inner: Arc::new(RwLock::new(CurrentHead {
+                counter: counter,
+                head: head
+            }))
         }
     }
 
@@ -95,39 +102,29 @@ impl FileSystemHead {
     }
 
     pub fn replace(&self, prev_head: Hash, next_head: Hash) -> Result<(), ()> {
-        
-        let mut counter = self.counter.write().unwrap();
-
-        let current_head = self.current_head();
+        let mut current = self.inner.write().unwrap();
 
                                             //Zmienił się head w czasie od ostatniego pobrania
-        if prev_head != current_head {
+        if current.head != prev_head {
             return Err(());
         }
-
                                             //Niepotrzebna aktualizacja
-        if current_head == next_head {
+        if current.head == next_head {
             return Ok(());
         }
 
-        let next_counter = *counter + 1;
+        let next_counter = current.counter + 1;
 
         self.save_file(&next_counter, &next_head);
 
-        let mut head_guard = self.head.write().unwrap();
- 
-        if *head_guard != prev_head {
-            panic!("Coś naprawdę złego");
-        }
-
-        *counter = next_counter;
-        *head_guard = next_head;
+        current.counter = next_counter;
+        current.head = next_head;
 
         Ok(())
     }
 
-    pub fn current_head(&self) -> Hash {
-        let lock = self.head.read().unwrap();
-        lock.clone()
+    pub fn current(&self) -> CurrentHead {
+        let inner = self.inner.read().unwrap();
+        inner.clone()
     }
 }

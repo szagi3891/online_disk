@@ -13,6 +13,7 @@ use filesystem::blob::key_value::BlobKeyValue;
 use filesystem::blob::fs::FsIo;
 use filesystem::utils::hash::Hash;
 use filesystem::data::dir::FileSystemDir;
+use filesystem::head::{CurrentHead};
 
 fn create_sub_path(path: &Path, sub_dir: &str) -> PathBuf {
     let mut path_buf = path.to_path_buf();
@@ -67,8 +68,8 @@ impl FileSystem {
         }
     }
 
-    pub fn current_head(&self) -> Hash {
-        self.head.current_head()
+    pub fn current_head(&self) -> CurrentHead {
+        self.head.current()
     }
 
     pub fn create_file(&self, data: &[u8]) -> Hash {
@@ -77,8 +78,8 @@ impl FileSystem {
 
 
     pub fn get_dir(&self, target_path: &[String], target_hash: &Hash) -> Option<FileSystemDir> {
-        let head = self.head.current_head();
-        self.data.get_dir(&head, target_path, target_hash)
+        let current = self.head.current();
+        self.data.get_dir(&current.head, target_path, target_hash)
     }
 
     /*
@@ -108,11 +109,21 @@ impl FileSystem {
     }
     */
 
+    pub fn add_dir(&self, target_path: &[String], target_hash: &Hash, name: &String) -> Result<(), ()> {
+        loop {
+            let current = self.head.current();
+            let head_new = self.data.add_dir(&current.head, (target_path, target_hash), name);
+            if let Some(result) = self.try_replace_head(current.head, head_new) {
+                return result;
+            }
+        }
+    }
+
     pub fn remove(&self, target_path: &[String], target_hash: &Hash, name: &String) -> Result<(), ()> {
         loop {
-            let head = self.head.current_head();
-            let head_new = self.data.remove(&head, (target_path, target_hash), name);
-            if let Some(result) = self.try_replace_head(head, head_new) {
+            let current = self.head.current();
+            let head_new = self.data.remove(&current.head, (target_path, target_hash), name);
+            if let Some(result) = self.try_replace_head(current.head, head_new) {
                 return result;
             }
         }
@@ -120,9 +131,9 @@ impl FileSystem {
 
     pub fn rename(&self, target_path: &[String], target_hash: &Hash, old_name: &String, new_name: &String) -> Result<(), ()> {
         loop {
-            let head = self.head.current_head();
-            let head_new = self.data.rename(&head, (target_path, target_hash), old_name, new_name);
-            if let Some(result) = self.try_replace_head(head, head_new) {
+            let current = self.head.current();
+            let head_new = self.data.rename(&current.head, (target_path, target_hash), old_name, new_name);
+            if let Some(result) = self.try_replace_head(current.head, head_new) {
                 return result;
             }
         }

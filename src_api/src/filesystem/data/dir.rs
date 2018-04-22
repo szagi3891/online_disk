@@ -17,6 +17,10 @@ impl FileSystemDir {
         }
     }
 
+    pub fn create_empty() -> FileSystemDir {
+        FileSystemDir::new(HashMap::new())
+    }
+    
     fn to_hashmap(self) -> HashMap<String, FileSystemNode> {
         self.files
     }
@@ -33,8 +37,8 @@ impl FileSystemDir {
         serde_json::to_vec(&self.files).unwrap()
     }
 
-    pub fn set_child(&mut self, subdir: &String, node: Hash) {
-        self.files.insert(subdir.clone(), FileSystemNode::newDir(node));
+    pub fn set_child(&mut self, subdir: &String, node: FileSystemNode) {
+        self.files.insert(subdir.clone(), node);
     }
 
     pub fn get_child(&self, subdir: &String) -> FileSystemNode {

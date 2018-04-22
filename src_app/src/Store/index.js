@@ -1,15 +1,15 @@
 //@flow
 
-import { action } from "mobx";
+import { action, observable } from "mobx";
 
 import { getHead } from '../Api';
 //import { Log } from './Log';
 
 export class Store {
-    //+log: Log;
+    @observable head: string | null;
 
     constructor() {
-        //this.log = new Log();
+        this.head = null;
     }
 
     @action getHead() {

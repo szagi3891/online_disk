@@ -69,27 +69,17 @@ impl<T: KeyValue> FileSystemData<T> {
         }
     }
 
-    /*
+    pub fn add_dir(&self, node: &Hash, target: (&[String], &Hash), name: &String) -> Option<Hash> {
+        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
+            let empty_dir_hash = self.key_value.set_blob(
+                &FileSystemDir::create_empty().to_blob()
+            );
 
-    */
-
-    //TODO - do przywrócenia
-    /*
-    pub fn get(&self, node: &Hash, target_path: &[String], target_node: &Hash) -> Option<GetResult> {
-        if let Some((target_path_head, target_path_rest)) = target_path.split_first() {
-            let mut node_dir = self.get_dir(&target_node);
-            let next_node = node_dir.get_child(&target_path_head);
-
-            self.get(&next_node, target_path_rest, target_node)
-        } else {
-            if *target_node == *node {
-                self.get_node(target_node)
-            } else {
-                None
-            }
-        }
+            node_dir.set_child(name, FileSystemNode::newDir(empty_dir_hash));
+            node_dir
+        })
     }
-    */
+    //self.key_value.set_blob(&dir.to_blob())
 
     fn modify_node<TF>(&self, node: &Hash, target: (&[String], &Hash), modify_node_f: TF) -> Option<Hash>
         where TF : FnOnce(FileSystemDir) -> FileSystemDir {
@@ -102,7 +92,7 @@ impl<T: KeyValue> FileSystemData<T> {
             if next_node.isDir {
                 return self.modify_node(&next_node.hash, (target_path_rest, target_node), modify_node_f)
                     .map(move |new_node| {
-                        node_dir.set_child(&target_path_head, new_node);
+                        node_dir.set_child(&target_path_head, FileSystemNode::newDir(new_node));
                         self.key_value.set_blob(&node_dir.to_blob())
                     })
             } else {
@@ -140,13 +130,6 @@ impl<T: KeyValue> FileSystemData<T> {
             node_dir
         })
     }
-
-    pub fn add(&self, node: &Hash, target: (&[String], &Hash), name: &String, new_content: Hash) -> Option<Hash> {
-        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
-            node_dir.add_child(name, new_content);
-            node_dir
-        })
-    }
     */
 
     pub fn remove(&self, node: &Hash, target: (&[String], &Hash), name: &String) -> Option<Hash> {
@@ -164,7 +147,7 @@ impl<T: KeyValue> FileSystemData<T> {
     }
 
     pub fn create_empty_dir(&self) -> Hash {
-        let dir = FileSystemDir::new(HashMap::new());
+        let dir = FileSystemDir::create_empty();
         self.key_value.set_blob(&dir.to_blob())
     }
 }
