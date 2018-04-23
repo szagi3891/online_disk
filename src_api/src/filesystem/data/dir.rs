@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use serde_json;
 
-use filesystem::utils::hash::Hash;
 use filesystem::data::node::FileSystemNode;
 
 #[derive(Serialize, Deserialize, Debug)]

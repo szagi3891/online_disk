@@ -9,6 +9,7 @@ pub struct Hash {
 
 impl Eq for Hash {}
 
+//https://serde.rs/custom-date-format.html
 pub mod hash_serializer_format {
     use serde::{Deserialize, Serializer, Deserializer};
     use filesystem::utils::hash::Hash;

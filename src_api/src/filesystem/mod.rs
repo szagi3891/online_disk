@@ -1,6 +1,5 @@
 use std::path::{Path, PathBuf};
 use std::fs::create_dir_all;
-use std::collections::HashMap;
 
 mod blob;
 pub mod data;

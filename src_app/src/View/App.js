@@ -35,6 +35,9 @@ export class App extends React.Component<PropsType> {
                     <button onClick={this._getHead}>Pobierz heada</button>
                 </div>
                 <div>
+                    { this._renderHead() }
+                </div>
+                <div>
                     <input value={this.input_folder} onChange={this._onChangeInput} />
                     <button onClick={this._onClickDodaj}>Dodaj</button>
                 </div>
@@ -44,6 +47,20 @@ export class App extends React.Component<PropsType> {
 
     _getHead = () => {
         store.getHead();
+    }
+
+    _renderHead(): React.Node {
+        const head = store.head;
+        if (head === null) {
+            return '---';
+        }
+
+        return (
+            <div>
+                <div>{ head.head }</div>
+                <div>{ head.counter }</div>
+            </div>
+        );
     }
 
     _onChangeInput = (event: SyntheticEvent<>) => {

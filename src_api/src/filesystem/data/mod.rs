@@ -1,6 +1,5 @@
 use filesystem::blob::types::KeyValue;
 use filesystem::utils::hash::Hash;
-use std::collections::HashMap;
 
 pub mod dir;
 mod file;
@@ -75,7 +74,7 @@ impl<T: KeyValue> FileSystemData<T> {
                 &FileSystemDir::create_empty().to_blob()
             );
 
-            node_dir.set_child(name, FileSystemNode::newDir(empty_dir_hash));
+            node_dir.set_child(name, FileSystemNode::new_dir(empty_dir_hash));
             node_dir
         })
     }
@@ -89,10 +88,10 @@ impl<T: KeyValue> FileSystemData<T> {
             let mut node_dir = self.get_node_dir(&node).unwrap();
             let next_node = node_dir.get_child(&target_path_head);
 
-            if next_node.isDir {
+            if next_node.is_dir {
                 return self.modify_node(&next_node.hash, (target_path_rest, target_node), modify_node_f)
                     .map(move |new_node| {
-                        node_dir.set_child(&target_path_head, FileSystemNode::newDir(new_node));
+                        node_dir.set_child(&target_path_head, FileSystemNode::new_dir(new_node));
                         self.key_value.set_blob(&node_dir.to_blob())
                     })
             } else {

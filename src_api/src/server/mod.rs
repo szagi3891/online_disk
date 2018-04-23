@@ -41,20 +41,8 @@ fn response400(body: &'static str) -> Box<Future<Item=Response, Error=hyper::Err
 fn response404(body: &'static str) -> Box<Future<Item=Response, Error=hyper::Error>> {
     let mut response = Response::new();
     //response.set_body("<form action='/submit'><input text='data' /></form>");
-    response.set_body("404 ...");
+    response.set_body(body);
     Box::new(futures::future::ok(response))
-}
-
-//TODO - przestarzała
-fn response200_old(body: serde_json::Value) -> Box<Future<Item=Response, Error=hyper::Error>> {
-    Box::new(futures::future::ok(
-        Response::new()
-            .with_header(ContentType::json())
-            .with_status(StatusCode::Ok)
-            .with_body(body.to_string())
-    ))
-
-    //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
 }
 
 fn response200(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
@@ -82,17 +70,11 @@ fn get_body_vec(body: hyper::Body) -> Box<Future<Item=Vec<u8>, Error=hyper::Erro
     )
 }
 
-struct HeadVersion {
-    //hash
-    //version
-}
 /*
     Tą strukturę zwracać w odpowiedzi na te requesty
 
     GET /api/head/
     POST /api/add_dir
-
-
 */
 
 #[derive(Clone)]
@@ -108,6 +90,8 @@ impl ServerTrait for ServerApp {
         let method_get = &method == &Method::Get;
         let method_post = &method == &Method::Post;
         let req_path = uri.path();
+
+        //panic!("Kolejne zrobić listowanie aktualnie wybranej ścieżki");
 
         if method_get && req_path == "/" {
             return self.static_file.send_file("index.html");
@@ -134,6 +118,8 @@ impl ServerTrait for ServerApp {
             }
 
             if method_post && rest == "add_dir" {
+                let filesystem = self.filesystem.clone();
+
                 return Box::new(
                     get_body_vec(body).and_then(move |buffer|{
 
@@ -153,6 +139,14 @@ impl ServerTrait for ServerApp {
                                 // target_path [] - pusty slice
                                 //name - nowy katalog do dodania
 
+                                let target_path: Vec<String> = Vec::new();
+
+                                filesystem.add_dir(
+                                    &target_path,
+                                    &filesystem.current_head().head,
+                                    &post.dir
+                                ).unwrap();
+
                                 /*
                                 self.filesystem.create_dir(
                                     target_node -- czyli head w tym testowym przypadku
@@ -160,9 +154,12 @@ impl ServerTrait for ServerApp {
                                     string - nowy katalog do utworzenia w środku
                                 )
                                 */
-                                return response200_old(json!({
-                                    "status": "ok"
-                                }));
+
+                                return response200(
+                                    serde_json::to_string(
+                                        &filesystem.current_head()
+                                    ).unwrap()
+                                );
                             }
                             Err(_) => {
                                 return response400("Problem ze zdekodowaniem parametrów /api/add_dir");
