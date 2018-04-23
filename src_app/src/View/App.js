@@ -5,6 +5,9 @@ import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 
 import { Store } from '../Store';
+import { DirAdd } from './DirAdd';
+import { DirList } from './DirList';
+
 const store = new Store();
 
 type PropsType = {|
@@ -12,37 +15,37 @@ type PropsType = {|
 
 @observer
 export class App extends React.Component<PropsType> {
-    @observable _counter: number;
-
-    @observable input_folder: string;
-
     constructor(props: PropsType) {
         super(props);
-
-        this._counter = 1;
-        this.input_folder = '';
-
-        setInterval(() => {
-            this._counter = this._counter + 1;
-        }, 1000);
+        store.getHead();
     }
 
     render(): React.Node {
         return (
             <React.Fragment>
                 <div>
-                    To jest główny komponent { this._counter } ...
                     <button onClick={this._getHead}>Pobierz heada</button>
                 </div>
                 <div>
                     { this._renderHead() }
                 </div>
-                <div>
-                    <input value={this.input_folder} onChange={this._onChangeInput} />
-                    <button onClick={this._onClickDodaj}>Dodaj</button>
-                </div>
+                <DirAdd store={store} />
+                { this._renderDirList() }
             </React.Fragment>
         );
+    }
+
+    _renderDirList() {
+        const currentHead = store.head;
+        if (currentHead !== null) {
+            return (
+                <DirList store={store} hash={currentHead.head} />
+            );
+        } else {
+            return (
+                <div>Ładowanie listy ...</div>
+            );
+        }
     }
 
     _getHead = () => {
@@ -61,19 +64,5 @@ export class App extends React.Component<PropsType> {
                 <div>{ head.counter }</div>
             </div>
         );
-    }
-
-    _onChangeInput = (event: SyntheticEvent<>) => {
-        const { target } = event;
-        if (target instanceof HTMLInputElement) {
-            this.input_folder = target.value;
-        }
-    }
-
-    _onClickDodaj = () => {
-        console.info("Zaczynam dodawać", this.input_folder);
-        store.addDir(this.input_folder).then(() => {
-            console.info("Koniec dodawania");
-        });
     }
 }

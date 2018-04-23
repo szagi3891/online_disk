@@ -54,4 +54,8 @@ export class Store {
             this.saveHead(response);
         });
     }
+
+    @action getDir(hash: string) {
+        console.info('TODO - inicjuję pobranie katalogu:', hash);
+    }
 }
