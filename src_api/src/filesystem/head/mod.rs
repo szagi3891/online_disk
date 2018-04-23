@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use std::sync::RwLock;
-use filesystem::utils::hash::Hash;
+use filesystem::utils::hash::{Hash, hash_serializer_format};
 use std::path::PathBuf;
 use filesystem::data::FileSystemData;
 use filesystem::blob::key_value::BlobKeyValue;
@@ -36,6 +36,7 @@ fn get_count_from_path(path: &PathBuf) -> u32 {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct CurrentHead { 
     pub counter: u32,
+    #[serde(with = "hash_serializer_format")]
     pub head: Hash,
 }
 

@@ -1,21 +1,31 @@
 use std::path::PathBuf;
 
 use filesystem::utils::hex::to_hex;
-use serde::{Serialize, Serializer};
 
-#[derive(PartialEq, Hash, Clone, Deserialize, Debug)]
+#[derive(PartialEq, Serialize, Deserialize, Hash, Clone, Debug)]
 pub struct Hash {
     hash: [u8; 20],
 }
 
 impl Eq for Hash {}
 
-impl Serialize for Hash {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+pub mod hash_serializer_format {
+    use serde::{Deserialize, Serializer, Deserializer};
+    use filesystem::utils::hash::Hash;
+
+    pub fn serialize<S>(hash: &Hash, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
-        let hex = self.to_hex();
+        let hex = hash.to_hex();
         serializer.serialize_str(&hex)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Hash, D::Error>
+        where D: Deserializer<'de>
+    {
+        let s = String::deserialize(deserializer)?;
+        let bytes = s.as_bytes();
+        Ok(Hash::from_string_bytes(bytes))
     }
 }
 

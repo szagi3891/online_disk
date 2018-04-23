@@ -14,7 +14,6 @@ use hyper::{
     StatusCode,
     header::ContentType,
     server::{
-        self,
         Request,
         Response
     }
@@ -29,10 +28,7 @@ use server::utils::{
 };
 use tokio_core::reactor::Handle;
 use futures_cpupool::CpuPool;
-use serde_json::{
-    self,
-    Value
-};
+use serde_json;
 
                 
 fn response400(body: &'static str) -> Box<Future<Item=Response, Error=hyper::Error>> {
@@ -72,7 +68,7 @@ fn response200(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
     //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
 }
 
-fn getBodyVec(body: hyper::Body) -> Box<Future<Item=Vec<u8>, Error=hyper::Error>> {
+fn get_body_vec(body: hyper::Body) -> Box<Future<Item=Vec<u8>, Error=hyper::Error>> {
     Box::new(
         body
             .collect()
@@ -109,22 +105,22 @@ impl ServerTrait for ServerApp {
     fn call(&self, req: Request, _handle: Handle) -> Box<Future<Item=Response, Error=hyper::Error>> {
         let (method, uri, _, _headers, body) = req.deconstruct();
 
-        let methodGet = &method == &Method::Get;
-        let methodPost = &method == &Method::Post;
+        let method_get = &method == &Method::Get;
+        let method_post = &method == &Method::Post;
         let req_path = uri.path();
 
-        if methodGet && req_path == "/" {
+        if method_get && req_path == "/" {
             return self.static_file.send_file("index.html");
         }
 
-        if methodGet {
+        if method_get {
             if let Some(rest) = match_str::match_str(req_path, "/static/") {
                 return self.static_file.send_file(rest);
             }
         }
 
         if let Some(rest) = match_str::match_str(req_path, "/api/") {
-            if methodGet && rest == "head" {
+            if method_get && rest == "head" {
                 return response200(
                     serde_json::to_string(
                         &self.filesystem.current_head()
@@ -137,9 +133,9 @@ impl ServerTrait for ServerApp {
                 */
             }
 
-            if methodPost && rest == "add_dir" {
+            if method_post && rest == "add_dir" {
                 return Box::new(
-                    getBodyVec(body).and_then(move |buffer|{
+                    get_body_vec(body).and_then(move |buffer|{
 
                         #[derive(Serialize, Deserialize, Debug)]
                         struct Post {
