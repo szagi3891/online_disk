@@ -1,3 +1,5 @@
+use filesystem::utils::hash::Hash;
+
 pub fn match_str<'a>(data: &'a str, pattern: &'a str) -> Option<&'a str> {
     let pattern_len = pattern.len();
 
@@ -11,9 +13,25 @@ pub fn match_str<'a>(data: &'a str, pattern: &'a str) -> Option<&'a str> {
     None
 }
 
-/*
-8894bf287965630718070411aa284b2f6ed7b974/dir
-*/
+pub fn match_hash<'a>(data: &'a str) -> Option<(Hash, &'a str)> {
+    let len = data.len();
+
+    if len >= 40 {
+        let (head, rest) = data.split_at(40);
+
+        for char_item in head.as_bytes() {
+            if char_item.is_ascii_hexdigit() == false {
+                return None;
+            }
+        }
+
+        return Some(
+            (Hash::from_string(head), rest)
+        );
+    }
+
+    None
+}
 
 #[test]
 fn match_str_test() {

@@ -9,6 +9,7 @@ type PropsType = {|
     store: Store
 |};
 
+@observer
 export class DirAdd extends React.Component<PropsType> {
     @observable input_folder: string;
 

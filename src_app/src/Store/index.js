@@ -32,11 +32,9 @@ type NodeItemType = {|
 |};
 
 const getDir = (hash: string): Promise<IMap<string, NodeItemType>> => {
-    return fetch(`/api/${hash}/dir`)
+    return fetch(`/api/node/${hash}/dir`)
         .then(response => response.json())
-        .then(response => {
-            console.info('response - trzeba skonwertować', response)
-        });
+        .then(response => IMap(response));
 };
 
 export class Store {
@@ -71,6 +69,8 @@ export class Store {
 
     @action getDir(hash: string) {
         console.info('TODO - inicjuję pobranie katalogu:', hash);
-        getDir(hash);
+        getDir(hash).then(response => {
+            console.info('Przeczytano dir z serwera', response);
+        });
     }
 }

@@ -31,14 +31,14 @@ use futures_cpupool::CpuPool;
 use serde_json;
 
                 
-fn response400(body: &'static str) -> Box<Future<Item=Response, Error=hyper::Error>> {
+fn response400(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
     let mut response = Response::new();
     response.set_status(StatusCode::BadRequest);
     response.set_body(body);
     return Box::new(futures::future::ok(response));
 }
 
-fn response404(body: &'static str) -> Box<Future<Item=Response, Error=hyper::Error>> {
+fn response404(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
     let mut response = Response::new();
     //response.set_body("<form action='/submit'><input text='data' /></form>");
     response.set_body(body);
@@ -139,6 +139,9 @@ impl ServerTrait for ServerApp {
                                 // target_path [] - pusty slice
                                 //name - nowy katalog do dodania
 
+
+                                //TODO - sparametryzować odpowiednio
+
                                 let target_path: Vec<String> = Vec::new();
 
                                 filesystem.add_dir(
@@ -162,14 +165,40 @@ impl ServerTrait for ServerApp {
                                 );
                             }
                             Err(_) => {
-                                return response400("Problem ze zdekodowaniem parametrów /api/add_dir");
+                                return response400("Problem ze zdekodowaniem parametrów /api/add_dir".to_string());
                             }
                         }
                     })
                 );
             }
 
-            //if method_get && 
+            if method_get {
+                if let Some(node_rest) = match_str::match_str(rest, "node/") {
+                    if let Some((hash, hash_rest)) = match_str::match_hash(node_rest) {
+                        if hash_rest == "/dir" {
+
+                            //TODO - sparametryzować odpowiednio
+                            let target_path: Vec<String> = Vec::new();
+                            let node_content = self.filesystem.get_dir(
+                                &target_path,
+                                &self.filesystem.current_head().head
+                            );
+
+                            if let Some(node_content) = node_content {
+                                return response200(
+                                    serde_json::to_string(
+                                        &node_content
+                                    ).unwrap()
+                                );
+                            }
+
+                            return response404(
+                                format!("Nie udało się przeczytać noda {}", hash.to_hex())
+                            );
+                        }
+                    }
+                }
+            }
 
             // /api/node/:hash/dir
             /*
@@ -177,7 +206,7 @@ impl ServerTrait for ServerApp {
             */
         }
 
-        response404("404 ...")
+        response404("404 ...".to_string())
     }
 }
 
