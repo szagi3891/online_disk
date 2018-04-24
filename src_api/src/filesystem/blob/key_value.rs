@@ -20,6 +20,7 @@ impl<T> BlobKeyValue<T> where T : Fs {
         }
     }
 
+    #[cfg(test)]
     pub fn get_fs(self) -> T {
         self.fs
     }

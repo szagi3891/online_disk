@@ -9,6 +9,9 @@ cd ..
 
 cd src_api
 
+echo "Odpalam testy"
+cargo test
+
 echo "Buduję api";
 cargo build
 

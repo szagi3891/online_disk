@@ -1,6 +1,7 @@
 //@flow
 
 import { action, observable } from "mobx";
+import { Map as IMap } from 'immutable';
 
 type CurrentHead = {
     head: string,
@@ -23,6 +24,19 @@ const addDir = (dir: string): Promise<CurrentHead> => {
 
     return fetch('/api/add_dir', fetchParam)
         .then(response => response.json());
+};
+
+type NodeItemType = {|
+    is_dir: bool,
+    hash: string,
+|};
+
+const getDir = (hash: string): Promise<IMap<string, NodeItemType>> => {
+    return fetch(`/api/${hash}/dir`)
+        .then(response => response.json())
+        .then(response => {
+            console.info('response - trzeba skonwertować', response)
+        });
 };
 
 export class Store {
@@ -57,5 +71,6 @@ export class Store {
 
     @action getDir(hash: string) {
         console.info('TODO - inicjuję pobranie katalogu:', hash);
+        getDir(hash);
     }
 }

@@ -169,6 +169,8 @@ impl ServerTrait for ServerApp {
                 );
             }
 
+            //if method_get && 
+
             // /api/node/:hash/dir
             /*
                 self.filesystem.get_dir(target_path, target_hash)

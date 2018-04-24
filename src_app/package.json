@@ -12,6 +12,7 @@
   "dependencies": {
     "glamor": "^2.20.40",
     "glamorous": "^4.12.3",
+    "immutable": "^3.8.2",
     "isomorphic-fetch": "^2.2.1",
     "mobx": "^4.1.1",
     "mobx-react": "^5.0.0",

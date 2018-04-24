@@ -11,6 +11,10 @@ pub fn match_str<'a>(data: &'a str, pattern: &'a str) -> Option<&'a str> {
     None
 }
 
+/*
+8894bf287965630718070411aa284b2f6ed7b974/dir
+*/
+
 #[test]
 fn match_str_test() {
     let aaa = "abcdef";

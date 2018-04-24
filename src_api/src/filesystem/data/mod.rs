@@ -154,39 +154,44 @@ impl<T: KeyValue> FileSystemData<T> {
 
 #[test]
 fn test_update_success() {
+    use std::collections::HashMap;
     use filesystem::blob::key_value_mock::BlobKeyValue;
+    use filesystem::data::node::FileSystemNode;
 
     let key_value_mock = BlobKeyValue::new();
 
     let hash_self = key_value_mock.set_blob({
         let dir = FileSystemDir::new({
             let mut map = HashMap::new();
-            map.insert("hhh".to_string(), new_hash_for_test(3));
+            map.insert("hhh".to_string(), FileSystemNode::new_dir(new_hash_for_test(3)));
             map
         });
 
         &dir.to_blob()
     });
 
-    assert_eq!(hash_self, Hash::from_string("f7affcfe684aad73ab0ad3fedb2b528da33b3022"));
+    assert_eq!(hash_self, Hash::from_string("041ac1ba8811217207c59fdc4a6f771c30976dcd"));
 
     let fs = FileSystemData::new(key_value_mock);
 
-    let result = fs.update(
+    let result = fs.add_dir(
         &hash_self,
-        (&mut Vec::new(), &hash_self),
-        &"hhh".to_string(),
-        new_hash_for_test(0x50)                                //nowa wartość
+        (
+            &mut Vec::new(),
+            &hash_self
+        ),
+        &"hhh".to_string()
     );
 
     let inner_hash = result.unwrap();
                                                                 //nowy hash powinien być inny
     assert_ne!(hash_self, inner_hash);
-    assert_eq!(inner_hash, Hash::from_string("ffc872739db509a3109c9c5adcc7b5613ddc7df7"))
+    assert_eq!(inner_hash, Hash::from_string("a1f440d63b1bb826d8ffa26e52ca95bece52b8ed"))
 }
 
 #[test]
 fn test_update_fail_target() {
+    use std::collections::HashMap;
     use filesystem::blob::key_value_mock::BlobKeyValue;
 
     let key_value_mock = BlobKeyValue::new();
@@ -194,22 +199,21 @@ fn test_update_fail_target() {
     let hash_self = key_value_mock.set_blob({
         let dir = FileSystemDir::new({
             let mut map = HashMap::new();
-            map.insert("hhh".to_string(), new_hash_for_test(100));
+            map.insert("hhh".to_string(), FileSystemNode::new_dir(new_hash_for_test(100)));
             map
         });
 
         &dir.to_blob()
     });
 
-    assert_eq!(hash_self, Hash::from_string("3ceeaf40f4348b6e1dd6594526c0a963cee75094"));
+    assert_eq!(hash_self, Hash::from_string("40cf36e9490db55acd519a4baed15017ca535109"));
 
     let fs = FileSystemData::new(key_value_mock);
 
-    let result = fs.update(
+    let result = fs.add_dir(
         &hash_self,
         (&mut Vec::new(), &new_hash_for_test(0x99)),
         &"hhh".to_string(),
-        new_hash_for_test(0x50)                                //nowa wartość
     );
 
     assert_eq!(result, None);
