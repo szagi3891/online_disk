@@ -15,21 +15,15 @@ type PropsType = {|
 
 @observer
 export class App extends React.Component<PropsType> {
-    constructor(props: PropsType) {
-        super(props);
-        store.getHead();
-    }
-
     render(): React.Node {
         return (
             <React.Fragment>
                 <div>
-                    <button onClick={this._getHead}>Pobierz heada</button>
-                </div>
-                <div>
                     { this._renderHead() }
                 </div>
+                <hr/>
                 <DirAdd store={store} />
+                <hr/>
                 { this._renderDirList() }
             </React.Fragment>
         );
@@ -46,10 +40,6 @@ export class App extends React.Component<PropsType> {
                 <div>Ładowanie listy ...</div>
             );
         }
-    }
-
-    _getHead = () => {
-        store.getHead();
     }
 
     _renderHead(): React.Node {

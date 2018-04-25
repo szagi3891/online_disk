@@ -2,12 +2,26 @@
 
 import { action, observable } from "mobx";
 import { Map as IMap } from 'immutable';
-import type { NodeItemType } from './Type';
+import type { CurrentHead, NodeItemType } from './Type';
+import { HeadStore } from './HeadStore';
 
 const getDir = (hash: string): Promise<IMap<string, NodeItemType>> => {
     return fetch(`/api/node/${hash}/dir`)
         .then(response => response.json())
         .then(response => IMap(response));
+};
+
+const addDir = (dir: string): Promise<CurrentHead> => {
+    const param = {
+        dir
+    };
+    const fetchParam = {
+        method: 'POST',
+        body: JSON.stringify(param)
+    };
+
+    return fetch('/api/add_dir', fetchParam)
+        .then(response => response.json());
 };
 
 class DirStoreItem {
@@ -29,9 +43,11 @@ class DirStoreItem {
 }
 
 export class DirStore {
+    +_headStore: HeadStore;
     +_data: Map<string, DirStoreItem>;
 
-    constructor() {
+    constructor(headStore: HeadStore) {
+        this._headStore = headStore;
         this._data = new Map();
     }
 
@@ -47,5 +63,12 @@ export class DirStore {
 
     getDir(hash: string): IMap<string, NodeItemType> | null {
         return this._getOrCreate(hash).value;
+    }
+
+
+    @action add(dir: string): Promise<void> {
+        return addDir(dir).then((response: CurrentHead) => {
+            this._headStore.saveHead(response);
+        });
     }
 }

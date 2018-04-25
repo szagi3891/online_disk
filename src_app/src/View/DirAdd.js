@@ -37,7 +37,7 @@ export class DirAdd extends React.Component<PropsType> {
 
     _onClickDodaj = () => {
         console.info("Zaczynam dodawać", this.input_folder);
-        this.props.store.addDir(this.input_folder).then(() => {
+        this.props.store.dir.add(this.input_folder).then(() => {
             console.info("Koniec dodawania");
         });
     }
