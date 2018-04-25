@@ -8,7 +8,7 @@ import { HeadStore } from './HeadStore';
 const getDir = (hash: string): Promise<IMap<string, NodeItemType>> => {
     return fetch(`/api/node/${hash}/dir`)
         .then(response => response.json())
-        .then(response => IMap(response));
+        .then(response => IMap(response.files));
 };
 
 const addDir = (dir: string): Promise<CurrentHead> => {

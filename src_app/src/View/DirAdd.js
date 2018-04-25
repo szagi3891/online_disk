@@ -40,5 +40,6 @@ export class DirAdd extends React.Component<PropsType> {
         this.props.store.dir.add(this.input_folder).then(() => {
             console.info("Koniec dodawania");
         });
+        this.input_folder = '';
     }
 }
