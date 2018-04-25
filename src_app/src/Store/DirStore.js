@@ -1,14 +1,14 @@
 //@flow
 
 import { action, observable } from "mobx";
-import { Map as IMap } from 'immutable';
+import { OrderedMap } from 'immutable';
 import type { CurrentHead, NodeItemType } from './Type';
 import { HeadStore } from './HeadStore';
 
-const getDir = (hash: string): Promise<IMap<string, NodeItemType>> => {
+const getDir = (hash: string): Promise<OrderedMap<string, NodeItemType>> => {
     return fetch(`/api/node/${hash}/dir`)
         .then(response => response.json())
-        .then(response => IMap(response.files));
+        .then(response => OrderedMap(response.files));
 };
 
 const addDir = (dir: string): Promise<CurrentHead> => {
@@ -25,7 +25,7 @@ const addDir = (dir: string): Promise<CurrentHead> => {
 };
 
 class DirStoreItem {
-    @observable _value: IMap<string, NodeItemType> | null;
+    @observable _value: OrderedMap<string, NodeItemType> | null;
 
     constructor(hash: string) {
         this._value = null;
@@ -37,7 +37,7 @@ class DirStoreItem {
         });
     }
 
-    get value(): IMap<string, NodeItemType> | null {
+    get value(): OrderedMap<string, NodeItemType> | null {
         return this._value;
     }
 }
@@ -61,7 +61,7 @@ export class DirStore {
         return newItem;
     }
 
-    getDir(hash: string): IMap<string, NodeItemType> | null {
+    getDir(hash: string): OrderedMap<string, NodeItemType> | null {
         return this._getOrCreate(hash).value;
     }
 

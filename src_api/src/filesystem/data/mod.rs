@@ -170,7 +170,7 @@ fn test_update_success() {
         &dir.to_blob()
     });
 
-    assert_eq!(hash_self, Hash::from_string("041ac1ba8811217207c59fdc4a6f771c30976dcd"));
+    assert_eq!(hash_self, Hash::from_string("358b76be6b10356357f59463e220894839c0a5d1"));
 
     let fs = FileSystemData::new(key_value_mock);
 
@@ -186,7 +186,7 @@ fn test_update_success() {
     let inner_hash = result.unwrap();
                                                                 //nowy hash powinien być inny
     assert_ne!(hash_self, inner_hash);
-    assert_eq!(inner_hash, Hash::from_string("a1f440d63b1bb826d8ffa26e52ca95bece52b8ed"))
+    assert_eq!(inner_hash, Hash::from_string("f680e833db5d555ec3a31f5b7b0ffd005ba639da"))
 }
 
 #[test]
@@ -206,7 +206,7 @@ fn test_update_fail_target() {
         &dir.to_blob()
     });
 
-    assert_eq!(hash_self, Hash::from_string("40cf36e9490db55acd519a4baed15017ca535109"));
+    assert_eq!(hash_self, Hash::from_string("c556d6b9c6dd76b9cfeb82aa47ec3622f786a0ea"));
 
     let fs = FileSystemData::new(key_value_mock);
 
