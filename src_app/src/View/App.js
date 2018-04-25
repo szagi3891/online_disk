@@ -36,10 +36,10 @@ export class App extends React.Component<PropsType> {
     }
 
     _renderDirList() {
-        const currentHead = store.head;
+        const currentHead = store.head.head;
         if (currentHead !== null) {
             return (
-                <DirList store={store} hash={currentHead.head} />
+                <DirList store={store} hash={currentHead} />
             );
         } else {
             return (

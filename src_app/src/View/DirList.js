@@ -10,21 +10,21 @@ type PropsType = {|
     hash: string
 |};
 
-type StateType = {|
-    store: Store,
-|};
-
 @observer
-export class DirList extends React.Component<PropsType, StateType> {
-    state = {
-        store: this.props.store
-    }
-
-    static getDerivedStateFromProps(nextProps: PropsType, prevState: StateType) {
-        prevState.store.getDir(nextProps.hash);
-    }
-
+export class DirList extends React.Component<PropsType> {
     render(): React.Node {
+        const { store, hash } = this.props;
+
+        const list = store.dir.getDir(hash);
+
+        if (!list) {
+            return (
+                <div>
+                    <i>Loading...</i>
+                </div>
+            );
+        }
+
         return (
             <div>
                 list z hashem

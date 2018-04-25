@@ -2,11 +2,8 @@
 
 import { action, observable } from "mobx";
 import { Map as IMap } from 'immutable';
-
-type CurrentHead = {
-    head: string,
-    counter: number,
-};
+import { DirStore } from './DirStore';
+import type { CurrentHead } from './Type';
 
 const getHead = (): Promise<CurrentHead> => {
     return fetch('/api/head')
@@ -26,36 +23,42 @@ const addDir = (dir: string): Promise<CurrentHead> => {
         .then(response => response.json());
 };
 
-type NodeItemType = {|
-    +is_dir: bool,
-    +hash: string,
-|};
-
-const getDir = (hash: string): Promise<IMap<string, NodeItemType>> => {
-    return fetch(`/api/node/${hash}/dir`)
-        .then(response => response.json())
-        .then(response => IMap(response));
-};
-
-export class Store {
-    @observable head: CurrentHead | null;
+class HeadStore {
+    @observable _head: CurrentHead | null;
 
     constructor() {
-        this.head = null;
+        this._head = null;
     }
 
-    @action saveHead(head: CurrentHead) {
-        if (this.head === null || this.head.counter < head.counter) {
-            console.info('Zapisuję nowy head', )
-            this.head = head;
+    @action saveHead(newHead: CurrentHead) {
+        if (this._head === null || this._head.counter < newHead.counter) {
+            console.info('Zapisuję nowy head', newHead);
+            this._head = newHead;
         }
+    }
+
+    get head(): string | null {
+        return this._head ? this._head.head : null;
+    }
+    get counter(): number | null {
+        return this._head ? this._head.counter : null;
+    }
+}
+
+export class Store {
+    +head: HeadStore;
+    +dir: DirStore;
+
+    constructor() {
+        this.head = new HeadStore();
+        this.dir = new DirStore();
     }
 
     @action getHead() {
         console.info('Strzelam akcją po head');
         getHead().then((head: CurrentHead) => {
             console.info('Otrzymany head', head);
-            this.saveHead(head);
+            this.head.saveHead(head);
         }).catch((error: mixed) => {
             console.info('Otrzymano błąd', error);
         })
@@ -63,14 +66,7 @@ export class Store {
 
     @action addDir(dir: string): Promise<void> {
         return addDir(dir).then((response: CurrentHead) => {
-            this.saveHead(response);
-        });
-    }
-
-    @action getDir(hash: string) {
-        console.info('TODO - inicjuję pobranie katalogu:', hash);
-        getDir(hash).then(response => {
-            console.info('Przeczytano dir z serwera', response);
+            this.head.saveHead(response);
         });
     }
 }
