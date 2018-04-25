@@ -27,8 +27,8 @@ const addDir = (dir: string): Promise<CurrentHead> => {
 };
 
 type NodeItemType = {|
-    is_dir: bool,
-    hash: string,
+    +is_dir: bool,
+    +hash: string,
 |};
 
 const getDir = (hash: string): Promise<IMap<string, NodeItemType>> => {
