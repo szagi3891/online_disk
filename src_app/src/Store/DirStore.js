@@ -7,7 +7,7 @@ import { HeadStore } from './HeadStore';
 import { PathStore } from './PathStore';
 
 const getDir = (hash: string, path: string): Promise<OrderedMap<string, NodeItemType>> => {
-    return fetch(`/api/node/dir/${hash}${path}`)
+    return fetch(`/api/dir/${hash}${path}`)
         .then(response => response.json())
         .then(response => OrderedMap(response.files));
 };

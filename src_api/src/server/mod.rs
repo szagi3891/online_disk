@@ -40,7 +40,7 @@ fn response400(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
 
 fn response404(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
     let mut response = Response::new();
-    //response.set_body("<form action='/submit'><input text='data' /></form>");
+    response.set_status(StatusCode::NotFound);
     response.set_body(body);
     Box::new(futures::future::ok(response))
 }
@@ -173,29 +173,29 @@ impl ServerTrait for ServerApp {
             }
 
             if method_get {
-                if let Some(node_rest) = match_str::match_str(rest, "node/") {
+                if let Some(node_rest) = match_str::match_str(rest, "dir/") {
                     if let Some((hash, hash_rest)) = match_str::match_hash(node_rest) {
-                        if hash_rest == "/dir" {
 
-                            //TODO - sparametryzować odpowiednio
-                            let target_path: Vec<String> = Vec::new();
-                            let node_content = self.filesystem.get_dir(
-                                &target_path,
-                                &self.filesystem.current_head().head
-                            );
+                        println!("Dostałem request /api/dir {:?} {}", &hash, &hash_rest);
 
-                            if let Some(node_content) = node_content {
-                                return response200(
-                                    serde_json::to_string(
-                                        &node_content
-                                    ).unwrap()
-                                );
-                            }
+                        //TODO - sparametryzować odpowiednio
+                        let target_path: Vec<String> = Vec::new();
+                        let node_content = self.filesystem.get_dir(
+                            &target_path,
+                            &self.filesystem.current_head().head
+                        );
 
-                            return response404(
-                                format!("Nie udało się przeczytać noda {}", hash.to_hex())
+                        if let Some(node_content) = node_content {
+                            return response200(
+                                serde_json::to_string(
+                                    &node_content
+                                ).unwrap()
                             );
                         }
+
+                        return response404(
+                            format!("Nie udało się przeczytać noda {}", hash.to_hex())
+                        );
                     }
                 }
             }
