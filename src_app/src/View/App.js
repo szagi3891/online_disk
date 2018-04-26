@@ -7,6 +7,7 @@ import { observer } from 'mobx-react';
 import { Store } from '../Store';
 import { DirAdd } from './DirAdd';
 import { DirList } from './DirList';
+import { Path } from './Path';
 
 const store = new Store();
 
@@ -22,6 +23,8 @@ export class App extends React.Component<PropsType> {
                     { this._renderHead() }
                 </div>
                 <hr/>
+                <Path store={store} />
+                <hr/>
                 <DirAdd store={store} />
                 <hr/>
                 { this._renderDirList() }
@@ -31,9 +34,11 @@ export class App extends React.Component<PropsType> {
 
     _renderDirList() {
         const currentHead = store.head.head;
+        const node_path = store.path.serialized;
+
         if (currentHead !== null) {
             return (
-                <DirList store={store} hash={currentHead} />
+                <DirList store={store} node_hash={currentHead} node_path={node_path}/>
             );
         } else {
             return (
@@ -49,10 +54,7 @@ export class App extends React.Component<PropsType> {
         }
 
         return (
-            <div>
-                <div>{ head.head }</div>
-                <div>{ head.counter }</div>
-            </div>
+            <div>{ head.head } - { head.counter }</div>
         );
     }
 }

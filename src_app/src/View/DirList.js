@@ -27,15 +27,16 @@ class DirListItem extends React.Component<DirListItemPropsType> {
 
 type PropsType = {|
     store: Store,
-    hash: string
+    node_hash: string,
+    node_path: string,
 |};
 
 @observer
 export class DirList extends React.Component<PropsType> {
     render(): React.Node {
-        const { store, hash } = this.props;
+        const { store, node_hash, node_path } = this.props;
 
-        const list = store.dir.getDir(hash);
+        const list = store.dir.getDir(node_hash, node_path);
 
         if (!list) {
             return (

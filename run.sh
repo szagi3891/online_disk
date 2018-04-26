@@ -4,6 +4,7 @@ echo "Buduję aplikację";
 
 cd src_app
 yarn
+yarn run flow
 ./build.sh
 cd ..
 
