@@ -8,6 +8,7 @@ import { Store } from '../Store';
 import type { NodeItemType } from '../Store/Type';
 
 type DirListItemPropsType = {|
+    store: Store,
     name: string,
     is_dir: bool,
     hash: string
@@ -18,10 +19,16 @@ class DirListItem extends React.Component<DirListItemPropsType> {
     render(): React.Node {
         const { name, is_dir } = this.props;
         return (
-            <div>
+            <div onClick={this._onClick}>
                 <div>name: {name}</div>
             </div>
         )
+    }
+
+    _onClick = () => {
+        const { store, name } = this.props;
+        const current = store.path.value;
+        store.path.goTo(current.push(name));
     }
 }
 
@@ -46,35 +53,22 @@ export class DirList extends React.Component<PropsType> {
             );
         }
 
-        //export type NodeItemType = {|
-        /*
-            +is_dir: bool,
-            +hash: string,
-        |};
-        */
+        const out = [];
 
+        for (const [name, node] of list.entries()) {
+            out.push((
+                <DirListItem
+                    store={store}
+                    name={name}
+                    is_dir={node.is_dir}
+                    hash={node.hash}
+                />
+            ));
+        }
+        
         return (
             <div>
-                { this._renderList(list) }
-            </div>
-        );
-    }
-
-    _renderList(list: IMap<string, NodeItemType>): React.Node {
-        const out = [];
-        console.info('AAAA', list.toJS());
-        for (const [name, node] of list.entries()) {
-            out.push(
-                this._renderListItem(name, node)
-            );
-        }
-        return out;
-    }
-
-    _renderListItem = (name: string, node: NodeItemType): React.Node => {
-        return (
-            <div key={node.hash}>
-                {name} -- { node.is_dir ? 'dir' : 'file'}
+                { out }
             </div>
         );
     }
