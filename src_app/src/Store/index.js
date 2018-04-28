@@ -14,7 +14,7 @@ export class Store {
 
     constructor() {
         this.head = new HeadStore();
-        this.root = new RootStore(this.head);
-        this.path = new PathStore(this.head);
+        this.path = new PathStore();
+        this.root = new RootStore(this.head, this.path);
     }
 }

@@ -3,8 +3,10 @@ import { action, computed } from 'mobx';
 import { List as IList, OrderedMap } from 'immutable';
 import { BlobStore } from '../Blob/BlobStore';
 import type { CurrentHead, NodeItemType } from '../Type';
+import { FileItem } from './FileItem';
+import { HeadStore } from '../HeadStore';
 
-const addDir = (dir: string): Promise<CurrentHead> => {
+const addDir = (node_hash: string, path: IList<string>, dir: string): Promise<CurrentHead> => {
     const param = {
         dir
     };
@@ -19,11 +21,12 @@ const addDir = (dir: string): Promise<CurrentHead> => {
 
 
 export class DirItem {
-    +_blob: BlobStore
+    +_head: HeadStore;
+    +_blob: BlobStore;
     +_hash: string;
     +_path: IList<string>;
 
-    constructor(blob: BlobStore, hash: string, path: IList<string>) {
+    constructor(head: HeadStore, blob: BlobStore, hash: string, path: IList<string>) {
         this._blob = blob;
         this._hash = hash;
         this._path = path;
@@ -34,26 +37,22 @@ export class DirItem {
     }
 
     @action add(dir: string): Promise<void> {
-
-        console.info('ADD DIR', dir);
-
-        return Promise.resolve();
-
-        //TODO
-        /*
-        return addDir(dir).then((response: CurrentHead) => {
-            this._setNewHead(response);
+        return addDir(this._hash, this._path, dir).then((response: CurrentHead) => {
+            this._head.saveHead(response);
         });
-        */
     }
 
-    child(name: string): DirItem | null {
+    child(name: string): DirItem | FileItem | null {
         const value = this.value;
 
         if (value !== null) {
             const hashChild = value.get(name);
             if (hashChild) {
-                return new DirItem(this._blob, hashChild.hash, this._path.push(name));
+                if (hashChild.is_dir) {
+                    return new DirItem(this._head, this._blob, hashChild.hash, this._path.push(name));
+                } else {
+                    return new FileItem(this._head, this._blob, hashChild.hash, this._path.push(name));
+                }
             }
         }
 
