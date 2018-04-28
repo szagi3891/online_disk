@@ -1,10 +1,10 @@
 //@flow
 
-import { action, observable } from "mobx";
+import { action, computed, observable } from "mobx";
 import { OrderedMap } from 'immutable';
 import type { CurrentHead, NodeItemType } from './Type';
 import { HeadStore } from './HeadStore';
-import { PathStore } from './PathStore';
+import { root } from "glamor";
 
 const getDir = (hash: string, path: string): Promise<OrderedMap<string, NodeItemType>> => {
     return fetch(`/api/dir/${hash}${path}`)
@@ -25,7 +25,7 @@ const addDir = (dir: string): Promise<CurrentHead> => {
         .then(response => response.json());
 };
 
-class DirStoreItem {
+class BlobStoreItem {
     @observable _value: OrderedMap<string, NodeItemType> | null;
 
     constructor(hash: string, path: string) {
@@ -43,23 +43,19 @@ class DirStoreItem {
     }
 }
 
-export class DirStore {
-    +_headStore: HeadStore;
-    +_pathStore: PathStore;
-    +_data: Map<string, DirStoreItem>;
+class BlobStore {
+    +_data: Map<string, BlobStoreItem>;
 
-    constructor(headStore: HeadStore, pathStore: PathStore) {
-        this._headStore = headStore;
-        this._pathStore = pathStore;
+    constructor() {
         this._data = new Map();
     }
 
-    _getOrCreate(node_hash: string, node_path: string): DirStoreItem {
+    _getOrCreate(node_hash: string, node_path: string): BlobStoreItem {
         const item = this._data.get(node_hash);
         if (item) {
             return item;
         }
-        const newItem = new DirStoreItem(node_hash, node_path);
+        const newItem = new BlobStoreItem(node_hash, node_path);
         this._data.set(node_hash, newItem);
         return newItem;
     }
@@ -67,17 +63,77 @@ export class DirStore {
     getDir(node_hash: string, node_path: string): OrderedMap<string, NodeItemType> | null {
         return this._getOrCreate(node_hash, node_path).value;
     }
+}
 
-    @action add(dir: string): Promise<void> {
-        return addDir(dir).then((response: CurrentHead) => {
-            this._headStore.saveHead(response);
-        });
+
+
+export class DirItem {
+    +_blob: BlobStore
+    +_hash: string;
+    +_path: string;
+
+    constructor(blob: BlobStore, hash: string, path: string) {
+        this._blob = blob;
+        this._hash = hash;
+        this._path = path;
     }
 
-    //Ta metoda będzie używana przez add_dir i inne które operują na nodzie
-    //Można by się pokusić żeby ta metoda zwracała od razu całą lokalizację /hash/path/do/noda
-    getNodeHashFromCurrentPath(): string | null {
+    @computed get value(): OrderedMap<string, NodeItemType> | null {
+        return this._blob.getDir(this._hash, this._path);
+    }
+
+    @action add(dir: string): Promise<void> {
+
+        console.info('ADD DIR', dir);
+
+        return Promise.resolve();
+
         //TODO
+        /*
+        return addDir(dir).then((response: CurrentHead) => {
+            this._setNewHead(response);
+        });
+        */
+    }
+
+    child(name: string): DirItem | null {
         return null;
+    }
+}
+
+export class DirStore {
+    +_head: HeadStore;
+    +_blob: BlobStore;
+    +_data: Map<string, DirItem>;
+
+    constructor(head: HeadStore) {
+        this._head = head;
+        this._blob = new BlobStore();
+        this._data = new Map();
+    }
+
+    getOrCreate(node_hash: string, node_path: string): DirItem {
+        const item = this._data.get(node_hash);
+        if (item) {
+            return item;
+        }
+        const newItem = new DirItem(this._blob, node_hash, node_path);
+        this._data.set(node_hash, newItem);
+        return newItem;
+    }
+
+    @computed get root(): DirItem | null {
+        const head = this._head.head;
+
+        if (head === null) {
+            return null;
+        }
+
+        return this.getOrCreate(head, "");
+    }
+
+    getItem(hash: string): DirItem | null {
+        const item = this._data.get(hash);
+        return item ? item : null;
     }
 }

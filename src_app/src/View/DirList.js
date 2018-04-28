@@ -6,6 +6,7 @@ import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { Store } from '../Store';
 import type { NodeItemType } from '../Store/Type';
+import { DirItem } from '../Store/DirStore';
 
 type DirListItemPropsType = {|
     store: Store,
@@ -34,16 +35,15 @@ class DirListItem extends React.Component<DirListItemPropsType> {
 
 type PropsType = {|
     store: Store,
-    node_hash: string,
-    node_path: string,
+    dirItem: DirItem
 |};
 
 @observer
 export class DirList extends React.Component<PropsType> {
     render(): React.Node {
-        const { store, node_hash, node_path } = this.props;
+        const { store, dirItem } = this.props;
 
-        const list = store.dir.getDir(node_hash, node_path);
+        const list = dirItem.value;
 
         if (!list) {
             return (

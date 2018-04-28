@@ -17,6 +17,8 @@ type PropsType = {|
 @observer
 export class App extends React.Component<PropsType> {
     render(): React.Node {
+        const root = store.dir.root;
+
         return (
             <React.Fragment>
                 <div>
@@ -25,7 +27,7 @@ export class App extends React.Component<PropsType> {
                 <hr/>
                 <Path store={store} />
                 <hr/>
-                <DirAdd store={store} />
+                { root !== null ? <DirAdd store={store} dirItem={root} /> : null }
                 <hr/>
                 { this._renderDirList() }
             </React.Fragment>
@@ -33,12 +35,11 @@ export class App extends React.Component<PropsType> {
     }
 
     _renderDirList() {
-        const currentHead = store.head.head;
-        const node_path = store.path.serialized;
+        const root = store.dir.root;
 
-        if (currentHead !== null) {
+        if (root !== null) {
             return (
-                <DirList store={store} node_hash={currentHead} node_path={node_path}/>
+                <DirList store={store} dirItem={root} />
             );
         } else {
             return (

@@ -4,9 +4,11 @@ import * as React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { Store } from '../Store';
+import { DirItem } from '../Store/DirStore';
 
 type PropsType = {|
-    store: Store
+    store: Store,
+    dirItem: DirItem
 |};
 
 @observer
@@ -36,8 +38,10 @@ export class DirAdd extends React.Component<PropsType> {
     }
 
     _onClickDodaj = () => {
+        const { dirItem } = this.props;
+
         console.info("Zaczynam dodawać", this.input_folder);
-        this.props.store.dir.add(this.input_folder).then(() => {
+        dirItem.add(this.input_folder).then(() => {
             console.info("Koniec dodawania");
         });
         this.input_folder = '';
