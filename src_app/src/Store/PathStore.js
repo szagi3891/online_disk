@@ -2,17 +2,15 @@
 import { action, computed, observable } from "mobx";
 import { List as IList, OrderedMap } from 'immutable';
 import type { NodeItemType } from './Type';
-import { DirStore, DirItem } from './DirStore';
+//import { DirStore, DirItem } from './DirStore';
 import { HeadStore } from './HeadStore';
 
 export class PathStore {
-    _head: HeadStore;
-    _dir: DirStore;
+    +_head: HeadStore;
     @observable _path: IList<string>;
 
-    constructor(headStore: HeadStore, dirStore: DirStore) {
+    constructor(headStore: HeadStore) {
         this._head = headStore;
-        this._dir = dirStore;
         this._path = IList();
     }
 
@@ -50,9 +48,31 @@ export class PathStore {
         this._path = newPath;
     }
 
-    _getItemByPath(parent: DirItem, path: IList<string>): DirItem | null {
-        //TODO
+    /*
+    _getFirst(list: IList<string>): [string, IList<string>] | null {
+        const first = list.first();
+        if (typeof first === 'string') {
+            return [first, list.shift()];
+        }
+
         return null;
+    }
+
+    _getItemByPath(parent: DirItem, path: IList<string>): DirItem | null {
+        const firstResult = this._getFirst(path);
+
+        if (!firstResult) {
+            return parent;
+        }
+
+        const [ first, rest ] = firstResult;
+
+        const child = parent.child(first);
+        if (!child) {
+            return null;
+        }
+
+        return this._getItemByPath(child, rest);
     }
 
     //TODO - na podstawie sciezki wybrac aktualnego noda
@@ -64,7 +84,7 @@ export class PathStore {
 
         return null;
     }
-
+    */
 }
 
 /*

@@ -17,7 +17,7 @@ type PropsType = {|
 @observer
 export class App extends React.Component<PropsType> {
     render(): React.Node {
-        const root = store.dir.root;
+        const root = store.root.root;
 
         return (
             <React.Fragment>
@@ -35,7 +35,7 @@ export class App extends React.Component<PropsType> {
     }
 
     _renderDirList() {
-        const root = store.dir.root;
+        const root = store.root.root;
 
         if (root !== null) {
             return (

@@ -6,7 +6,7 @@ import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { Store } from '../Store';
 import type { NodeItemType } from '../Store/Type';
-import { DirItem } from '../Store/DirStore';
+import { DirItem } from '../Store/Root/DirItem';
 
 type DirListItemPropsType = {|
     store: Store,
