@@ -19,9 +19,9 @@ export class DirList extends React.Component<PropsType> {
     render(): React.Node {
         const { store, dirItem } = this.props;
 
-        const list = dirItem.value;
+        const childList = dirItem.childList;
 
-        if (!list) {
+        if (!childList) {
             return (
                 <div>
                     <i>Loading...</i>
@@ -31,13 +31,24 @@ export class DirList extends React.Component<PropsType> {
 
         const out = [];
 
-        for (const [name, node] of list.entries()) {
+        const parent = dirItem.parent;
+
+        if (parent) {
+            out.push((
+                <DirListItem
+                    store={store}
+                    name={null}
+                    node={parent}
+                />
+            ));
+        }
+
+        for (const [name, node] of childList.entries()) {
             out.push((
                 <DirListItem
                     store={store}
                     name={name}
-                    is_dir={node.is_dir}
-                    hash={node.hash}
+                    node={node}
                 />
             ));
         }

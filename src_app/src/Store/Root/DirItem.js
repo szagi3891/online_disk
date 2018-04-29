@@ -21,18 +21,25 @@ const addDir = (node_hash: string, path: IList<string>, dir: string): Promise<Cu
 
 
 export class DirItem {
+    +_parent: DirItem | null;
     +_head: HeadStore;
     +_blob: BlobStore;
     +_hash: string;
     +_path: IList<string>;
 
-    constructor(head: HeadStore, blob: BlobStore, hash: string, path: IList<string>) {
+    constructor(parent: DirItem | null, head: HeadStore, blob: BlobStore, hash: string, path: IList<string>) {
+        this._parent = parent;
+        this._head = head;
         this._blob = blob;
         this._hash = hash;
         this._path = path;
     }
 
-    @computed get value(): OrderedMap<string, NodeItemType> | null {
+    get path(): IList<string> {
+        return this._path;
+    }
+
+    @computed get _listNodes(): OrderedMap<string, NodeItemType> | null {
         return this._blob.getDir(this._hash, this._path);
     }
 
@@ -42,31 +49,52 @@ export class DirItem {
         });
     }
 
-    child(name: string): DirItem | FileItem | null {
-        const value = this.value;
+    @computed get childList(): OrderedMap<string, DirItem | FileItem> | null {
+        const listNodes = this._listNodes;
 
-        if (value !== null) {
-            const hashChild = value.get(name);
+        if (listNodes !== null) {
+            return listNodes.map(
+                (item: NodeItemType, name: string): DirItem | FileItem => this._mapNode(name, item)
+            );
+        }
+
+        return null;
+    }
+
+    _mapNode(name: string, item: NodeItemType): DirItem | FileItem {
+        if (item.is_dir) {
+            return new DirItem(
+                this,
+                this._head,
+                this._blob,
+                item.hash,
+                this._path.push(name)
+            );
+        } else {
+            return new FileItem(
+                this._head,
+                this._blob,
+                item.hash,
+                this._path.push(name),
+                name
+            );
+        }
+    }
+
+    child(name: string): DirItem | FileItem | null {
+        const listNodes = this._listNodes;
+
+        if (listNodes !== null) {
+            const hashChild = listNodes.get(name);
             if (hashChild) {
-                if (hashChild.is_dir) {
-                    return new DirItem(
-                        this._head,
-                        this._blob,
-                        hashChild.hash,
-                        this._path.push(name)
-                    );
-                } else {
-                    return new FileItem(
-                        this._head,
-                        this._blob,
-                        hashChild.hash,
-                        this._path.push(name),
-                        name
-                    );
-                }
+                return this._mapNode(name, hashChild);
             }
         }
 
         return null;
+    }
+
+    get parent(): DirItem | null {
+        return this._parent;
     }
 }

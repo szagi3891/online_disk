@@ -19,5 +19,9 @@ export class FileItem {
         this._path = path;
     }
 
+    get path(): IList<string> {
+        return this._path;
+    }
+
     //TODO
 }

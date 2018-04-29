@@ -56,7 +56,7 @@ export class RootStore {
             return null;
         }
 
-        return new DirItem(this._head, this._blob, head, IList());
+        return new DirItem(null, this._head, this._blob, head, IList());
     }
 
     @computed get currentPathNodes(): CurrentPathNodesType {
