@@ -20,12 +20,15 @@ use hyper::{
 };
 use server::utils::{
     static_file::StaticFile,
-    match_str,
+    match_str::{
+        convert_to_hash
+    },
     server::{
         ServerTrait,
         Server
     }
 };
+use filesystem::utils::hash::Hash;
 use tokio_core::reactor::Handle;
 use futures_cpupool::CpuPool;
 use serde_json;
@@ -77,6 +80,77 @@ fn get_body_vec(body: hyper::Body) -> Box<Future<Item=Vec<u8>, Error=hyper::Erro
     POST /api/add_dir
 */
 
+                                                                    //TODO - zamienić na slice (z typu Vec<&'a str>)
+
+fn split_path<'a>(req_path: &'a str) -> Vec<&'a str> {
+    let mut out = Vec::new();
+
+    for item in req_path.split('/') {
+        if item != "" {
+            out.push(item);
+        }
+    }
+    return out; 
+}
+
+fn url_match_first<'a>(path_chunk: &Vec<&'a str>, pattern: &'a str) -> bool {
+    let mut iter = path_chunk.iter();
+
+    let first: Option<&&'a str> = iter.next();
+    
+    if let Some(first) = first {
+        if *first == pattern {
+            return true
+        }
+    }
+
+    false
+}
+
+//convert_to_hash
+
+fn url_hash<'a>(path_chunk: &Vec<&'a str>) -> Option<(Hash, Vec<&'a str>)> {
+    let mut iter = path_chunk.iter();
+
+    let first: Option<&&'a str> = iter.next();
+    
+    if let Some(first) = first {
+        let hash = convert_to_hash(*first);
+
+        if let Some(hash) = hash {
+            let mut out = Vec::new();
+            for item in iter {
+                out.push(*item);
+            }
+            return Some((hash, out));
+
+        }
+    }
+
+    None
+}
+
+
+fn url_match<'a>(path_chunk: &Vec<&'a str>, pattern: &'a str) -> Option<Vec<&'a str>> {
+    let mut iter = path_chunk.iter();
+
+    let first: Option<&&'a str> = iter.next();
+    
+    if let Some(first) = first {
+        if *first == pattern {
+            let mut out = Vec::new();
+            for item in iter {
+                out.push(*item);
+            }
+            return Some(out);
+        }
+    }
+
+    None
+}
+
+//if let Some(rest) = match_str::match_str(req_path, "/static/") {
+
 #[derive(Clone)]
 struct ServerApp {
     static_file: StaticFile,
@@ -89,22 +163,28 @@ impl ServerTrait for ServerApp {
 
         let method_get = &method == &Method::Get;
         let method_post = &method == &Method::Post;
-        let req_path = uri.path();
+        let req_path_new = uri.path();
 
-        //panic!("Kolejne zrobić listowanie aktualnie wybranej ścieżki");
+        if req_path_new.len() > 1000 {
+            return response400("Zapytanie za długie".to_owned());
+        }
 
-        if method_get && req_path == "/" {
+        let path_chunks = split_path(req_path_new);
+
+        if method_get && path_chunks.len() == 0 {
             return self.static_file.send_file("index.html");
         }
 
         if method_get {
-            if let Some(rest) = match_str::match_str(req_path, "/static/") {
-                return self.static_file.send_file(rest);
+            //if let Some(rest) = match_str::match_str(req_path, "/static/") {
+            if let Some(rest) = url_match(&path_chunks, "static") {
+                return self.static_file.send_file(&rest.as_slice().join("/"));
             }
         }
 
-        if let Some(rest) = match_str::match_str(req_path, "/api/") {
-            if method_get && rest == "head" {
+        //if let Some(rest) = match_str::match_str(req_path, "/api/") {
+        if let Some(rest) = url_match(&path_chunks, "api") {
+            if method_get && url_match_first(&rest, "head") {
                 return response200(
                     serde_json::to_string(
                         &self.filesystem.current_head()
@@ -117,7 +197,7 @@ impl ServerTrait for ServerApp {
                 */
             }
 
-            if method_post && rest == "add_dir" {
+            if method_post && url_match_first(&rest, "add_dir") {
                 let filesystem = self.filesystem.clone();
 
                 return Box::new(
@@ -173,10 +253,12 @@ impl ServerTrait for ServerApp {
             }
 
             if method_get {
-                if let Some(node_rest) = match_str::match_str(rest, "dir/") {
-                    if let Some((hash, hash_rest)) = match_str::match_hash(node_rest) {
+                //if let Some(node_rest) = match_str::match_str(rest, "dir/") {
+                if let Some(node_rest) = url_match(&rest, "dir") {
+                    //if let Some((hash, hash_rest)) = match_str::match_hash(node_rest) {
+                    if let Some((_hash, _target_path)) = url_hash(&node_rest) {
 
-                        println!("Dostałem request /api/dir {:?} {}", &hash, &hash_rest);
+                        println!("Dostałem request /api/dir {:?} {:?}", &_hash, &_target_path);
 
                         //TODO - sparametryzować odpowiednio
                         let target_path: Vec<String> = Vec::new();
@@ -194,7 +276,7 @@ impl ServerTrait for ServerApp {
                         }
 
                         return response404(
-                            format!("Nie udało się przeczytać noda {}", hash.to_hex())
+                            format!("Nie udało się przeczytać noda {}", _hash.to_hex())
                         );
                     }
                 }

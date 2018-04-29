@@ -13,6 +13,22 @@ pub fn match_str<'a>(data: &'a str, pattern: &'a str) -> Option<&'a str> {
     None
 }
 
+pub fn convert_to_hash<'a>(data: &'a str) -> Option<Hash> {
+    if data.len() == 40 {
+        for char_item in data.as_bytes() {
+            if char_item.is_ascii_hexdigit() == false {
+                return None;
+            }
+        }
+
+        return Some(
+            Hash::from_string(data)
+        );
+    }
+
+    None
+}
+
 pub fn match_hash<'a>(data: &'a str) -> Option<(Hash, &'a str)> {
     let len = data.len();
 
