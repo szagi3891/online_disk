@@ -107,8 +107,6 @@ fn url_match_first<'a>(path_chunk: &Vec<&'a str>, pattern: &'a str) -> bool {
     false
 }
 
-//convert_to_hash
-
 fn url_hash<'a>(path_chunk: &Vec<&'a str>) -> Option<(Hash, Vec<&'a str>)> {
     let mut iter = path_chunk.iter();
 
@@ -149,7 +147,15 @@ fn url_match<'a>(path_chunk: &Vec<&'a str>, pattern: &'a str) -> Option<Vec<&'a 
     None
 }
 
-//if let Some(rest) = match_str::match_str(req_path, "/static/") {
+fn convert_vec_str(data: &Vec<&str>) -> Vec<String> {
+    let mut out = Vec::new();
+
+    for item in data {
+        out.push(item.to_string());
+    }
+
+    out
+}
 
 #[derive(Clone)]
 struct ServerApp {
@@ -176,13 +182,11 @@ impl ServerTrait for ServerApp {
         }
 
         if method_get {
-            //if let Some(rest) = match_str::match_str(req_path, "/static/") {
             if let Some(rest) = url_match(&path_chunks, "static") {
                 return self.static_file.send_file(&rest.as_slice().join("/"));
             }
         }
 
-        //if let Some(rest) = match_str::match_str(req_path, "/api/") {
         if let Some(rest) = url_match(&path_chunks, "api") {
             if method_get && url_match_first(&rest, "head") {
                 return response200(
@@ -253,18 +257,15 @@ impl ServerTrait for ServerApp {
             }
 
             if method_get {
-                //if let Some(node_rest) = match_str::match_str(rest, "dir/") {
                 if let Some(node_rest) = url_match(&rest, "dir") {
-                    //if let Some((hash, hash_rest)) = match_str::match_hash(node_rest) {
-                    if let Some((_hash, _target_path)) = url_hash(&node_rest) {
+                    if let Some((hash, target_path_str)) = url_hash(&node_rest) {
 
-                        println!("Dostałem request /api/dir {:?} {:?}", &_hash, &_target_path);
+                        println!("Dostałem request /api/dir {:?} {:?}", &hash, &target_path_str);
 
-                        //TODO - sparametryzować odpowiednio
-                        let target_path: Vec<String> = Vec::new();
+                        let target_path: Vec<String> = convert_vec_str(&target_path_str);
                         let node_content = self.filesystem.get_dir(
                             &target_path,
-                            &self.filesystem.current_head().head
+                            &hash
                         );
 
                         if let Some(node_content) = node_content {
@@ -276,7 +277,7 @@ impl ServerTrait for ServerApp {
                         }
 
                         return response404(
-                            format!("Nie udało się przeczytać noda {}", _hash.to_hex())
+                            format!("Nie udało się przeczytać noda {}", hash.to_hex())
                         );
                     }
                 }
