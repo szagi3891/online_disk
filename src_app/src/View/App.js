@@ -35,11 +35,18 @@ export class App extends React.Component<PropsType> {
     }
 
     _renderDirList() {
-        const root = store.root.root;
+        const pathDir = store.root.currentPathNodes.path;
 
-        if (root !== null) {
+        console.info('Renderuję listę', {
+            list: store.root.currentPathNodes.path.toJS(),
+            last: store.root.currentPathNodes.last
+        });
+
+        const last = pathDir.last();
+
+        if (last) {
             return (
-                <DirList store={store} dirItem={root} />
+                <DirList store={store} dirItem={last} />
             );
         } else {
             return (

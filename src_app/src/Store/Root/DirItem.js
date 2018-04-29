@@ -49,9 +49,20 @@ export class DirItem {
             const hashChild = value.get(name);
             if (hashChild) {
                 if (hashChild.is_dir) {
-                    return new DirItem(this._head, this._blob, hashChild.hash, this._path.push(name));
+                    return new DirItem(
+                        this._head,
+                        this._blob,
+                        hashChild.hash,
+                        this._path.push(name)
+                    );
                 } else {
-                    return new FileItem(this._head, this._blob, hashChild.hash, this._path.push(name));
+                    return new FileItem(
+                        this._head,
+                        this._blob,
+                        hashChild.hash,
+                        this._path.push(name),
+                        name
+                    );
                 }
             }
         }

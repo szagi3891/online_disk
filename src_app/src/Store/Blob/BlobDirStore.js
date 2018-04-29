@@ -15,9 +15,7 @@ class BlobDirItem {
     constructor(hash: string, path: IList<string>) {
         this._value = null;
 
-        console.info('TODO - inicjuję pobranie katalogu:', hash);
         getDir(hash, path).then(response => {
-            console.info('Przeczytano dir z serwera', response);
             this._value = response;
         });
     }

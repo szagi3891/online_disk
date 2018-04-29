@@ -7,31 +7,7 @@ import { observer } from 'mobx-react';
 import { Store } from '../Store';
 import type { NodeItemType } from '../Store/Type';
 import { DirItem } from '../Store/Root/DirItem';
-
-type DirListItemPropsType = {|
-    store: Store,
-    name: string,
-    is_dir: bool,
-    hash: string
-|};
-
-@observer
-class DirListItem extends React.Component<DirListItemPropsType> {
-    render(): React.Node {
-        const { name, is_dir } = this.props;
-        return (
-            <div onClick={this._onClick}>
-                <div>name: {name}</div>
-            </div>
-        )
-    }
-
-    _onClick = () => {
-        const { store, name } = this.props;
-        const current = store.path.value;
-        store.path.goTo(current.push(name));
-    }
-}
+import { DirListItem } from './DirListItem';
 
 type PropsType = {|
     store: Store,

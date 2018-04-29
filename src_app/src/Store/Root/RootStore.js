@@ -5,7 +5,38 @@ import type { CurrentHead, NodeItemType } from '../Type';
 import { HeadStore } from '../HeadStore';
 import { BlobStore } from '../Blob/BlobStore';
 import { DirItem } from './DirItem';
+import { FileItem } from './FileItem';
 import { PathStore } from '../PathStore';
+
+const findItemDir = (parent: DirItem, currentPath: IList<string>): [IList<DirItem>, null | FileItem] => {
+    const first = currentPath.first();
+
+    if (typeof first === 'string') {
+        const nextChild = parent.child(first);
+
+        if (nextChild === null) {
+            return [IList(), null];
+        }
+
+        if (nextChild instanceof FileItem) {
+            return [IList(), nextChild];
+        }
+        
+        if (nextChild instanceof DirItem) {
+            const [dirList, lastElement] = findItemDir(nextChild, currentPath.shift());
+            return [dirList.unshift(nextChild), lastElement];
+        }
+
+        throw Error('Store.Root.findItemDir: Nieobsłużone odgałęzienie');
+    }
+
+    return [IList(), null];
+}
+
+type CurrentPathNodesType = {|
+    path: IList<DirItem>,
+    last: null | FileItem
+|};
 
 export class RootStore {
     +_head: HeadStore;
@@ -28,83 +59,19 @@ export class RootStore {
         return new DirItem(this._head, this._blob, head, IList());
     }
 
-    /*
-    @computed get currentPath(): [IList<DirItem>, null | FileItem] {
+    @computed get currentPathNodes(): CurrentPathNodesType {
+        const root = this.root;
+        if (!root) {
+            return {
+                path: IList(),
+                last: null
+            };
+        }
 
+        const [path, last] = findItemDir(root, this._path.value);
+        return {
+            path: path.unshift(root),
+            last
+        };
     }
-    */
 }
-
-
-    /*
-    @computed get serialized(): string {
-        if (this._path.size === 0) {
-            return '';
-        }
-
-        return `/${this._path.join('/')}`;
-    }
-    */
-
-    /*
-    @computed get currentHash(): string | null {
-        return null;
-    }
-    */
-
-    /*
-    //Sprawdza czy ta ścieżka jest poprawna
-    _verifyPath(newPath: IList<string>): bool {
-
-    }
-    */
-
-    /*
-    getHashFromPath(path: IList<string>): string | null {
-    }
-    */
-
-    /*
-    _getFirst(list: IList<string>): [string, IList<string>] | null {
-        const first = list.first();
-        if (typeof first === 'string') {
-            return [first, list.shift()];
-        }
-
-        return null;
-    }
-
-    _getItemByPath(parent: DirItem, path: IList<string>): DirItem | null {
-        const firstResult = this._getFirst(path);
-
-        if (!firstResult) {
-            return parent;
-        }
-
-        const [ first, rest ] = firstResult;
-
-        const child = parent.child(first);
-        if (!child) {
-            return null;
-        }
-
-        return this._getItemByPath(child, rest);
-    }
-
-    //TODO - na podstawie sciezki wybrac aktualnego noda
-    @computed get currentItem(): DirItem | null {
-        const rootItem = this._dir.root;
-        if (rootItem) {
-            return this._getItemByPath(rootItem, this._path);
-        }
-
-        return null;
-    }
-    */
-
-/*
-
-a/b/c
-    wez hash dla a/b
-    wez katalog dla 
-*/

@@ -10,11 +10,14 @@ export class FileItem {
     +_blob: BlobStore
     +_hash: string;
     +_path: IList<string>;
+    +_name: string;         //Nazwa pliku. Jego rozszerzenie określa zawartość
 
-    constructor(head: HeadStore, blob: BlobStore, hash: string, path: IList<string>) {
+    constructor(head: HeadStore, blob: BlobStore, hash: string, path: IList<string>, name: string) {
         this._head = head;
         this._blob = blob;
         this._hash = hash;
         this._path = path;
     }
+
+    //TODO
 }
