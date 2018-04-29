@@ -15,7 +15,7 @@ const addDir = (node_hash: string, path: IList<string>, dir: string): Promise<Cu
         body: JSON.stringify(param)
     };
 
-    return fetch('/api/add_dir', fetchParam)
+    return fetch(`/api/add_dir/${node_hash}/${path.join('/')}`, fetchParam)
         .then(response => response.json());
 };
 

@@ -27,21 +27,28 @@ export class App extends React.Component<PropsType> {
                 <hr/>
                 <Path store={store} />
                 <hr/>
-                { root !== null ? <DirAdd store={store} dirItem={root} /> : null }
+                { this._renderAdd() }
                 <hr/>
                 { this._renderDirList() }
             </React.Fragment>
         );
     }
 
+    _renderAdd() {
+        const pathDir = store.root.currentPathNodes.path;
+        const last = pathDir.last();
+
+        if (last) {
+            return (
+                <DirAdd store={store} dirItem={last} />
+            );
+        }
+
+        return null;
+    }
+
     _renderDirList() {
         const pathDir = store.root.currentPathNodes.path;
-
-        console.info('Renderuję listę', {
-            list: store.root.currentPathNodes.path.toJS(),
-            last: store.root.currentPathNodes.last
-        });
-
         const last = pathDir.last();
 
         if (last) {

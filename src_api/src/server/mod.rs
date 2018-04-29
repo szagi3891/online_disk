@@ -180,7 +180,7 @@ impl ServerTrait for ServerApp {
         if method_get && path_chunks.len() == 0 {
             return self.static_file.send_file("index.html");
         }
-
+    
         if method_get {
             if let Some(rest) = url_match(&path_chunks, "static") {
                 return self.static_file.send_file(&rest.as_slice().join("/"));
@@ -194,66 +194,47 @@ impl ServerTrait for ServerApp {
                         &self.filesystem.current_head()
                     ).unwrap()
                 );
-                /*
-                return response200(json!({
-                    "head": self.filesystem.current_head().to_hex()
-                }));
-                */
             }
 
-            if method_post && url_match_first(&rest, "add_dir") {
-                let filesystem = self.filesystem.clone();
+            if method_post {
+                if let Some(node_rest) = url_match(&rest, "add_dir") {
+                    if let Some((hash, target_path_str)) = url_hash(&node_rest) {
 
-                return Box::new(
-                    get_body_vec(body).and_then(move |buffer|{
+                        let filesystem = self.filesystem.clone();
+                        let target_path: Vec<String> = convert_vec_str(&target_path_str);
 
-                        #[derive(Serialize, Deserialize, Debug)]
-                        struct Post {
-                            //target_node: node docelowy
-                            //target_path: /path/jakas/adsasdsa
-                            dir: String,
-                        }
+                        return Box::new(
+                            get_body_vec(body).and_then(move |buffer|{
 
-                        let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
+                                #[derive(Serialize, Deserialize, Debug)]
+                                struct Post {
+                                    dir: String,
+                                }
 
-                        match result {
-                            Ok(post) => {
-                                //self.filesystem.add_dir(target_path, target_hash, name)
-                                // target_path - --- root - head ...
-                                // target_path [] - pusty slice
-                                //name - nowy katalog do dodania
+                                let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
 
+                                match result {
+                                    Ok(post) => {
+                                        let result_add = filesystem.add_dir(
+                                            &target_path,
+                                            &hash,
+                                            &post.dir
+                                        );
 
-                                //TODO - sparametryzować odpowiednio
-
-                                let target_path: Vec<String> = Vec::new();
-
-                                filesystem.add_dir(
-                                    &target_path,
-                                    &filesystem.current_head().head,
-                                    &post.dir
-                                ).unwrap();
-
-                                /*
-                                self.filesystem.create_dir(
-                                    target_node -- czyli head w tym testowym przypadku
-                                    [] - pusta tablice - czyli względem roota nigdzie nie idziemy
-                                    string - nowy katalog do utworzenia w środku
-                                )
-                                */
-
-                                return response200(
-                                    serde_json::to_string(
-                                        &filesystem.current_head()
-                                    ).unwrap()
-                                );
-                            }
-                            Err(_) => {
-                                return response400("Problem ze zdekodowaniem parametrów /api/add_dir".to_string());
-                            }
-                        }
-                    })
-                );
+                                        return response200(
+                                            serde_json::to_string(
+                                                &filesystem.current_head()
+                                            ).unwrap()
+                                        );
+                                    }
+                                    Err(_) => {
+                                        return response400("Problem ze zdekodowaniem parametrów /api/add_dir".to_string());
+                                    }
+                                }
+                            })
+                        );
+                    }
+                }
             }
 
             if method_get {
