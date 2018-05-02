@@ -3,7 +3,7 @@ import 'isomorphic-fetch';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 
-import { Store } from 'Store';
+import { Store } from './Store';
 import { App } from './View/App';
 
 const root = document.getElementById('root');

@@ -17,21 +17,26 @@ export class Path extends React.Component<PropsType> {
 
         const out = [];
 
-        for (let amountItem = 1; amountItem <= fullPath.size; amountItem++) {
+        for (let amountItem = 0; amountItem <= fullPath.size; amountItem++) {
             const key = `${fullPath.join('/')}--${amountItem}`;
+
+            const itemUrl = fullPath.slice(0, amountItem);
+            const goToPath = amountItem < fullPath.size ? itemUrl : null;
+            const caption = itemUrl.last();
+
             out.push(
                 <PathItem
                     key={key}
+                    caption={typeof caption === 'string' ? caption : 'ROOT'}
                     store={store}
-                    fullPath={fullPath}
-                    amountItem={amountItem}
+                    goToPath={goToPath}
                 />
             );
         }
 
         return (
             <div>
-                path: { out }
+                { out }
             </div>
         );
     }

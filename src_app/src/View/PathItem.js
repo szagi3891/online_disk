@@ -5,41 +5,57 @@ import { List as IList } from 'immutable';
 import { observer } from 'mobx-react';
 import glamorous from 'glamorous';
 import { Store } from '../Store';
+import rgba from 'hex-rgba';
 
-const PathItemSpan = glamorous.span({
-    paddingRight: '5px',
+const PathItemBox = glamorous.span({
+    paddingRight: '5px'
+});
+
+const PathItemNoActive = glamorous(PathItemBox)({
+    cursror: 'default'
+});
+
+const PathItemSpanClick = glamorous(PathItemBox)({
     cursor: 'pointer',
+    color: rgba('#0000ff', 50),
     ':hover': {
-        textDecoration: 'underline',
         opacity: '0.5'
     }
 });
 
 type PropsType = {|
     store: Store,
-    fullPath: IList<string>,
-    amountItem: number,
+    caption: string,
+    goToPath: IList<string> | null
 |};
 
 @observer
 export class PathItem extends React.Component<PropsType> {
     render(): React.Node {
-        const currentPath = this._currentPath();
-        const caption = currentPath.last();
+        const { goToPath, caption } = this.props;
+
+        if (goToPath !== null) {
+            return (
+                <React.Fragment>
+                    <PathItemSpanClick onClick={this._onClick}>
+                        { caption }
+                    </PathItemSpanClick>
+                    <PathItemBox>&gt;</PathItemBox>
+                </React.Fragment>
+            );
+        }
+
         return (
-            <PathItemSpan onClick={this._onClick}>
+            <PathItemNoActive>
                 { caption }
-            </PathItemSpan>
+            </PathItemNoActive>
         );
     }
 
-    _currentPath(): IList<string> {
-        const { fullPath, amountItem } = this.props;
-        return fullPath.slice(0, amountItem);
-    }
-
     _onClick = () => {
-        const { store } = this.props;
-        store.path.goTo(this._currentPath());
+        const { store, goToPath } = this.props;
+        if (goToPath !== null) {
+            store.path.goTo(goToPath);
+        }
     }
 }
