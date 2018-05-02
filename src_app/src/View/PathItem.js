@@ -27,36 +27,37 @@ const PathItemSpanClick = glamorous(PathItemBox)({
 type PropsType = {|
     store: Store,
     caption: string,
-    goToPath: IList<string> | null
+    path: IList<string>,
+    idDir: bool
 |};
 
 @observer
 export class PathItem extends React.Component<PropsType> {
     render(): React.Node {
-        const { goToPath, caption } = this.props;
+        const { path, caption, idDir, store } = this.props;
 
-        if (goToPath !== null) {
+        const hasCurrentPath = store.path.hasCurrentSet(path);
+
+        if (hasCurrentPath) {
             return (
-                <React.Fragment>
-                    <PathItemSpanClick onClick={this._onClick}>
-                        <DirListItemName name={caption} isDir={true} />
-                    </PathItemSpanClick>
-                    <PathItemBox>&gt;</PathItemBox>
-                </React.Fragment>
+                <PathItemNoActive>
+                    <DirListItemName name={caption} isDir={idDir} />
+                </PathItemNoActive>
             );
         }
 
         return (
-            <PathItemNoActive>
-                <DirListItemName name={caption} isDir={true} />
-            </PathItemNoActive>
+            <React.Fragment>
+                <PathItemSpanClick onClick={this._onClick}>
+                    <DirListItemName name={caption} isDir={idDir} />
+                </PathItemSpanClick>
+                <PathItemBox>&gt;</PathItemBox>
+            </React.Fragment>
         );
     }
 
     _onClick = () => {
-        const { store, goToPath } = this.props;
-        if (goToPath !== null) {
-            store.path.goTo(goToPath);
-        }
+        const { store, path } = this.props;
+        store.path.goTo(path);
     }
 }

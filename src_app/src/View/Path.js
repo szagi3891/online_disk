@@ -16,25 +16,35 @@ type PropsType = {|
 
 @observer
 export class Path extends React.Component<PropsType> {
+
     render(): React.Node {
         const { store } = this.props;
-        const fullPath = store.path.value;
+        const currentPathNodes = store.root.currentPathNodes;
 
         const out = [];
 
-        for (let amountItem = 0; amountItem <= fullPath.size; amountItem++) {
-            const key = `${fullPath.join('/')}--${amountItem}`;
-
-            const itemUrl = fullPath.slice(0, amountItem);
-            const goToPath = amountItem < fullPath.size ? itemUrl : null;
-            const caption = itemUrl.last();
-
+        for (const item of currentPathNodes.path) {
             out.push(
                 <PathItem
-                    key={key}
-                    caption={typeof caption === 'string' ? caption : 'ROOT'}
+                    key={item.path.join('/')}
+                    caption={item.name}
                     store={store}
-                    goToPath={goToPath}
+                    path={item.path}
+                    idDir={true}
+                />
+            );
+        }
+
+        const fileItem = currentPathNodes.last;
+
+        if (fileItem) {
+            out.push(
+                <PathItem
+                    key={fileItem.path.join('/')}
+                    caption={fileItem.name}
+                    store={store}
+                    path={fileItem.path}
+                    idDir={false}
                 />
             );
         }

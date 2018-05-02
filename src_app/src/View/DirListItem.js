@@ -41,17 +41,19 @@ type PropsType = {|
 @observer
 export class DirListItem extends React.Component<PropsType> {
     render(): React.Node {
-        const { name } = this.props;
+        const { name, node } = this.props;
+        const isDir = node instanceof DirItem;
+
         if (name === null) {
             return (
                 <Main onClick={this._onClick}>
-                    <DirListItemName name=".." isDir={true} />
+                    <DirListItemName name=".." isDir={isDir} />
                 </Main>
             );
         }
         return (
             <Main onClick={this._onClick}>
-                <DirListItemName name={name} isDir={true} />
+                <DirListItemName name={name} isDir={isDir} />
                 { this._renderDeleteOption() }
             </Main>
         );

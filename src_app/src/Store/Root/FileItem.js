@@ -23,5 +23,7 @@ export class FileItem {
         return this._path;
     }
 
-    //TODO
+    get name(): string {
+        return this._name;
+    }
 }

@@ -26,17 +26,23 @@ export class DirItem {
     +_blob: BlobStore;
     +_hash: string;
     +_path: IList<string>;
+    +_name: string;
 
-    constructor(parent: DirItem | null, head: HeadStore, blob: BlobStore, hash: string, path: IList<string>) {
+    constructor(parent: DirItem | null, head: HeadStore, blob: BlobStore, hash: string, path: IList<string>, name: string) {
         this._parent = parent;
         this._head = head;
         this._blob = blob;
         this._hash = hash;
         this._path = path;
+        this._name = name;
     }
 
     get path(): IList<string> {
         return this._path;
+    }
+
+    get name(): string {
+        return this._name;
     }
 
     @computed get _listNodes(): OrderedMap<string, NodeItemType> | null {
@@ -68,7 +74,8 @@ export class DirItem {
                 this._head,
                 this._blob,
                 item.hash,
-                this._path.push(name)
+                this._path.push(name),
+                name
             );
         }
         return new FileItem(

@@ -13,6 +13,10 @@ export class PathStore {
         return this._path;
     }
 
+    hasCurrentSet(path: IList<string>): bool {
+        return this._path.equals(path);
+    }
+
     @action goTo(newPath: IList<string>) {
         this._path = newPath;
     }
