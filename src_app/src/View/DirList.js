@@ -1,11 +1,8 @@
 //@flow
 
 import * as React from 'react';
-import { Map as IMap } from 'immutable';
-import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { Store } from '../Store';
-import type { NodeItemType } from '../Store/Type';
 import { DirItem } from '../Store/Root/DirItem';
 import { DirListItem } from './DirListItem';
 

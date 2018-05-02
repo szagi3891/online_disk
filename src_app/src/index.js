@@ -3,20 +3,17 @@ import 'isomorphic-fetch';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 
+import { Store } from 'Store';
 import { App } from './View/App';
-
-//root
 
 const root = document.getElementById('root');
 
 if (root) {
-    //const store = new Store(playlisty, findChannel());
-
-    //runAudioReaction(store);
+    const store = new Store();
 
     ReactDOM.render(
         <React.Fragment>
-            <App />
+            <App store={store} />
         </React.Fragment>
         ,
         root

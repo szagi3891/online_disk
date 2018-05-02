@@ -40,10 +40,13 @@ export class DirAdd extends React.Component<PropsType> {
     _onClickDodaj = () => {
         const { dirItem } = this.props;
 
-        console.info("Zaczynam dodawać", this.input_folder);
+        console.info('Zaczynam dodawać', this.input_folder);
         dirItem.add(this.input_folder).then(() => {
-            console.info("Koniec dodawania");
+            console.info('Koniec dodawania');
+        }).catch((error: mixed) => {
+            console.error('Otrzymano błąd', error);
         });
+
         this.input_folder = '';
     }
 }

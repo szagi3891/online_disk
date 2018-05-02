@@ -70,15 +70,14 @@ export class DirItem {
                 item.hash,
                 this._path.push(name)
             );
-        } else {
-            return new FileItem(
-                this._head,
-                this._blob,
-                item.hash,
-                this._path.push(name),
-                name
-            );
         }
+        return new FileItem(
+            this._head,
+            this._blob,
+            item.hash,
+            this._path.push(name),
+            name
+        );
     }
 
     child(name: string): DirItem | FileItem | null {

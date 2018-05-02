@@ -1,7 +1,6 @@
 //@flow
 
-import { action, computed } from 'mobx';
-import { List as IList, OrderedMap } from 'immutable';
+import { List as IList } from 'immutable';
 import { BlobStore } from '../Blob/BlobStore';
 import { HeadStore } from '../HeadStore';
 
@@ -17,6 +16,7 @@ export class FileItem {
         this._blob = blob;
         this._hash = hash;
         this._path = path;
+        this._name = name;
     }
 
     get path(): IList<string> {

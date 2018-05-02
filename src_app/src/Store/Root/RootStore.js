@@ -1,7 +1,6 @@
 //@flow
-import { action, computed, observable } from "mobx";
-import { OrderedMap, List as IList } from 'immutable';
-import type { CurrentHead, NodeItemType } from '../Type';
+import { computed } from 'mobx';
+import { List as IList } from 'immutable';
 import { HeadStore } from '../HeadStore';
 import { BlobStore } from '../Blob/BlobStore';
 import { DirItem } from './DirItem';
@@ -31,7 +30,7 @@ const findItemDir = (parent: DirItem, currentPath: IList<string>): [IList<DirIte
     }
 
     return [IList(), null];
-}
+};
 
 type CurrentPathNodesType = {|
     path: IList<DirItem>,

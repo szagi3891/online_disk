@@ -1,5 +1,5 @@
 //@flow
-import { action, observable } from "mobx";
+import { action, observable } from 'mobx';
 import type { CurrentHead } from './Type';
 
 const getHead = (): Promise<CurrentHead> => {
@@ -19,8 +19,8 @@ export class HeadStore {
             console.info('Otrzymany head', head);
             this.saveHead(head);
         }).catch((error: mixed) => {
-            console.info('Otrzymano błąd', error);
-        })
+            console.error('Otrzymano błąd', error);
+        });
     }
 
     @action saveHead(newHead: CurrentHead) {

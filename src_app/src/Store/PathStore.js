@@ -1,7 +1,6 @@
 //@flow
-import { action, computed, observable } from "mobx";
-import { List as IList, OrderedMap } from 'immutable';
-import type { NodeItemType } from './Type';
+import { action, observable } from 'mobx';
+import { List as IList } from 'immutable';
 
 export class PathStore {
     @observable _path: IList<string>;

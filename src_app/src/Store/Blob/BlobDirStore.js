@@ -17,6 +17,8 @@ class BlobDirItem {
 
         getDir(hash, path).then(response => {
             this._value = response;
+        }).catch((error: mixed) => {
+            console.error('Otrzymano błąd', error);
         });
     }
 

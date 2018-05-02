@@ -1,7 +1,6 @@
 //@flow
 
 import * as React from 'react';
-import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 
 import { Store } from '../Store';
@@ -9,16 +8,14 @@ import { DirAdd } from './DirAdd';
 import { DirList } from './DirList';
 import { Path } from './Path';
 
-const store = new Store();
-
 type PropsType = {|
+    store: Store,
 |};
 
 @observer
 export class App extends React.Component<PropsType> {
     render(): React.Node {
-        const root = store.root.root;
-
+        const { store } = this.props;
         return (
             <React.Fragment>
                 <div>
@@ -35,6 +32,7 @@ export class App extends React.Component<PropsType> {
     }
 
     _renderAdd() {
+        const { store } = this.props;
         const pathDir = store.root.currentPathNodes.path;
         const last = pathDir.last();
 
@@ -48,6 +46,7 @@ export class App extends React.Component<PropsType> {
     }
 
     _renderDirList() {
+        const { store } = this.props;
         const pathDir = store.root.currentPathNodes.path;
         const last = pathDir.last();
 
@@ -55,14 +54,15 @@ export class App extends React.Component<PropsType> {
             return (
                 <DirList store={store} dirItem={last} />
             );
-        } else {
-            return (
-                <div>Ładowanie listy ...</div>
-            );
         }
+
+        return (
+            <div>Ładowanie listy ...</div>
+        );
     }
 
     _renderHead(): React.Node {
+        const { store } = this.props;
         const head = store.head;
         if (head === null) {
             return '---';
