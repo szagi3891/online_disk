@@ -7,6 +7,7 @@ import rgba from 'hex-rgba';
 import { Store } from '../Store';
 import { DirItem } from '../Store/Root/DirItem';
 import { FileItem } from '../Store/Root/FileItem';
+import { DirListItemName } from './DirListItemName';
 
 const backgroundColor = '#e0e0e0';
 
@@ -31,10 +32,6 @@ const OptionDiv = glamorous.div({
     }
 });
 
-const renderName = (name: string) => {
-    return <div>{name}</div>;
-};
-
 type PropsType = {|
     store: Store,
     name: string | null,
@@ -48,13 +45,13 @@ export class DirListItem extends React.Component<PropsType> {
         if (name === null) {
             return (
                 <Main onClick={this._onClick}>
-                    { renderName('..') }
+                    <DirListItemName name=".." isDir={true} />
                 </Main>
             );
         }
         return (
             <Main onClick={this._onClick}>
-                { renderName(name) }
+                <DirListItemName name={name} isDir={true} />
                 { this._renderDeleteOption() }
             </Main>
         );

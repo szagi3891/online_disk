@@ -1,0 +1,14 @@
+https://www.iconfinder.com/iconsets/tango-icon-library
+
+inny motyw:
+https://www.iconfinder.com/iconsets/snipicons
+
+
+
+https://medium.com/@scbarrus/transform-raw-svg-files-into-react-components-in-seconds-25faf56a6f07
+
+    instalacja
+    npm install --global svg-to-react-cli
+
+    użycie
+    svgtoreact if_folder_118926 folder.js

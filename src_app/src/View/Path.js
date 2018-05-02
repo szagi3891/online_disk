@@ -2,8 +2,13 @@
 
 import * as React from 'react';
 import { observer } from 'mobx-react';
+import glamorous from 'glamorous';
 import { Store } from '../Store';
 import { PathItem } from './PathItem';
+
+const Main = glamorous.div({
+    display: 'flex'
+});
 
 type PropsType = {|
     store: Store
@@ -35,9 +40,9 @@ export class Path extends React.Component<PropsType> {
         }
 
         return (
-            <div>
+            <Main>
                 { out }
-            </div>
+            </Main>
         );
     }
 }

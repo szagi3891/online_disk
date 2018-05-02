@@ -79,7 +79,7 @@
         "react/no-danger": 1,
 
         "no-use-before-define": "error",
-        "max-len": [2, {"code": 200, "ignoreComments": true}],
+        "max-len": [2, {"code": 1000, "ignoreComments": true}],
         "array-callback-return": 0,
 
         "no-invalid-this": 0,

@@ -18,20 +18,20 @@ export class App extends React.Component<PropsType> {
         const { store } = this.props;
         return (
             <React.Fragment>
-                <div>
-                    { this._renderHead() }
-                </div>
+                { this._renderHead() }
                 <hr/>
                 <Path store={store} />
                 <hr/>
-                { this._renderAdd() }
+                { this._renderAddDir() }
+                <hr/>
+                { this._renderAddEmptyTextFile() }
                 <hr/>
                 { this._renderDirList() }
             </React.Fragment>
         );
     }
 
-    _renderAdd() {
+    _renderAddDir() {
         const { store } = this.props;
         const pathDir = store.root.currentPathNodes.path;
         const last = pathDir.last();
@@ -43,6 +43,12 @@ export class App extends React.Component<PropsType> {
         }
 
         return null;
+    }
+
+    _renderAddEmptyTextFile() {
+        return (
+            <div>Dodaj pusty plik tekstowy</div>
+        );
     }
 
     _renderDirList() {

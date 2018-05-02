@@ -43,7 +43,7 @@ export class DirItem {
         return this._blob.getDir(this._hash, this._path);
     }
 
-    @action add(dir: string): Promise<void> {
+    @action addDir(dir: string): Promise<void> {
         return addDir(this._hash, this._path, dir).then((response: CurrentHead) => {
             this._head.saveHead(response);
         });

@@ -6,6 +6,7 @@ import { observer } from 'mobx-react';
 import glamorous from 'glamorous';
 import { Store } from '../Store';
 import rgba from 'hex-rgba';
+import { DirListItemName } from './DirListItemName';
 
 const PathItemBox = glamorous.span({
     paddingRight: '5px'
@@ -19,7 +20,7 @@ const PathItemSpanClick = glamorous(PathItemBox)({
     cursor: 'pointer',
     color: rgba('#0000ff', 50),
     ':hover': {
-        opacity: '0.5'
+        color: rgba('#0000ff', 25)
     }
 });
 
@@ -38,7 +39,7 @@ export class PathItem extends React.Component<PropsType> {
             return (
                 <React.Fragment>
                     <PathItemSpanClick onClick={this._onClick}>
-                        { caption }
+                        <DirListItemName name={caption} isDir={true} />
                     </PathItemSpanClick>
                     <PathItemBox>&gt;</PathItemBox>
                 </React.Fragment>
@@ -47,7 +48,7 @@ export class PathItem extends React.Component<PropsType> {
 
         return (
             <PathItemNoActive>
-                { caption }
+                <DirListItemName name={caption} isDir={true} />
             </PathItemNoActive>
         );
     }

@@ -25,7 +25,7 @@ export class DirAdd extends React.Component<PropsType> {
         return (
             <div>
                 <input value={this.input_folder} onChange={this._onChangeInput} />
-                <button onClick={this._onClickDodaj}>Dodaj</button>
+                <button onClick={this._onClickAddDir}>Dodaj katalog</button>
             </div>
         );
     }
@@ -37,11 +37,11 @@ export class DirAdd extends React.Component<PropsType> {
         }
     }
 
-    _onClickDodaj = () => {
+    _onClickAddDir = () => {
         const { dirItem } = this.props;
 
         console.info('Zaczynam dodawać', this.input_folder);
-        dirItem.add(this.input_folder).then(() => {
+        dirItem.addDir(this.input_folder).then(() => {
             console.info('Koniec dodawania');
         }).catch((error: mixed) => {
             console.error('Otrzymano błąd', error);

@@ -1,0 +1,1 @@
+jeśli katalog ma w nazwie spacje, to api wysypuje się przy jego pobieraniu (błąd dekodowania parametru)
