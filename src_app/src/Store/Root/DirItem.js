@@ -8,17 +8,36 @@ import { HeadStore } from '../HeadStore';
 
 const addDir = (node_hash: string, path: IList<string>, dir: string): Promise<CurrentHead> => {
     const param = {
-        dir
+        dir,
+        node_hash,
+        path: path.toArray()
+    };
+
+    const fetchParam = {
+        method: 'POST',
+        body: JSON.stringify(param)
+    };
+
+    return fetch('/api/add_dir', fetchParam).then(response => response.json());
+};
+
+/*
+const addEmptyFile = (node_hash: string, path: IList<string>, dir: string): Promise<CurrentHead> => {
+    const param = {
+        dir,
+        node_hash,
+        path: path.toArray()
     };
     const fetchParam = {
         method: 'POST',
         body: JSON.stringify(param)
     };
 
-    return fetch(`/api/add_dir/${node_hash}/${path.join('/')}`, fetchParam)
+    // /${node_hash}/${path.join('/')}
+    return fetch('/api/add_dir', fetchParam)
         .then(response => response.json());
 };
-
+*/
 
 export class DirItem {
     +_parent: DirItem | null;
@@ -53,6 +72,15 @@ export class DirItem {
         return addDir(this._hash, this._path, dir).then((response: CurrentHead) => {
             this._head.saveHead(response);
         });
+    }
+
+    @action addEmptyFile(fileName: string): Promise<void> {
+        /*
+        return addEmptyFile(this._hash, this._path, fileName).then((response: CurrentHead) => {
+            this._head.saveHead(response);
+        });
+        */
+        return Promise.resolve();
     }
 
     @computed get childList(): OrderedMap<string, DirItem | FileItem> | null {

@@ -87,7 +87,7 @@
         "no-magic-numbers": 0,
         "no-duplicate-imports": 0,
 
-        "class-methods-use-this": 2,
+        //"class-methods-use-this": 2,
         "curly": 2,
         "no-else-return": 2,
         "eqeqeq": 2,

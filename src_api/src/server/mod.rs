@@ -147,16 +147,6 @@ fn url_match<'a>(path_chunk: &Vec<&'a str>, pattern: &'a str) -> Option<Vec<&'a 
     None
 }
 
-fn convert_vec_str(data: &Vec<&str>) -> Vec<String> {
-    let mut out = Vec::new();
-
-    for item in data {
-        out.push(item.to_string());
-    }
-
-    out
-}
-
 #[derive(Clone)]
 struct ServerApp {
     static_file: StaticFile,
@@ -198,33 +188,82 @@ impl ServerTrait for ServerApp {
 
             if method_post {
                 if let Some(node_rest) = url_match(&rest, "add_dir") {
-                    if let Some((hash, target_path_str)) = url_hash(&node_rest) {
+
+                    let filesystem = self.filesystem.clone();
+
+                    return Box::new(
+                        get_body_vec(body).and_then(move |buffer|{
+
+                            #[derive(Serialize, Deserialize, Debug)]
+                            struct Post {
+                                dir: String,
+                                node_hash: String,
+                                path: Vec<String>
+                            }
+
+                            let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
+
+                            match result {
+                                Ok(post) => {
+                                    let hash = Hash::from_string(&post.node_hash);
+
+                                    let result_add = filesystem.add_dir(
+                                        &post.path,
+                                        &hash,
+                                        &post.dir
+                                    );
+
+                                    return response200(
+                                        serde_json::to_string(
+                                            &filesystem.current_head()
+                                        ).unwrap()
+                                    );
+                                }
+                                Err(_) => {
+                                    return response400("Problem ze zdekodowaniem parametrów /api/add_dir".to_string());
+                                }
+                            }
+                        })
+                    );
+                }
+            }
+
+            if method_post {
+                if let Some(node_rest) = url_match(&rest, "dir") {
+                    if let Some(_) = url_match(&node_rest, "list") {
 
                         let filesystem = self.filesystem.clone();
-                        let target_path: Vec<String> = convert_vec_str(&target_path_str);
 
                         return Box::new(
                             get_body_vec(body).and_then(move |buffer|{
 
                                 #[derive(Serialize, Deserialize, Debug)]
                                 struct Post {
-                                    dir: String,
+                                    node_hash: String,
+                                    path: Vec<String>
                                 }
 
                                 let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
 
                                 match result {
                                     Ok(post) => {
-                                        let result_add = filesystem.add_dir(
-                                            &target_path,
-                                            &hash,
-                                            &post.dir
+                                        let hash = Hash::from_string(&post.node_hash);
+
+                                        let node_content = filesystem.get_dir(
+                                            &post.path,
+                                            &hash
                                         );
 
-                                        return response200(
-                                            serde_json::to_string(
-                                                &filesystem.current_head()
-                                            ).unwrap()
+                                        if let Some(node_content) = node_content {
+                                            return response200(
+                                                serde_json::to_string(
+                                                    &node_content
+                                                ).unwrap()
+                                            );
+                                        }
+
+                                        return response404(
+                                            format!("Nie udało się przeczytać noda {}", hash.to_hex())
                                         );
                                     }
                                     Err(_) => {
@@ -232,33 +271,6 @@ impl ServerTrait for ServerApp {
                                     }
                                 }
                             })
-                        );
-                    }
-                }
-            }
-
-            if method_get {
-                if let Some(node_rest) = url_match(&rest, "dir") {
-                    if let Some((hash, target_path_str)) = url_hash(&node_rest) {
-
-                        println!("Dostałem request /api/dir {:?} {:?}", &hash, &target_path_str);
-
-                        let target_path: Vec<String> = convert_vec_str(&target_path_str);
-                        let node_content = self.filesystem.get_dir(
-                            &target_path,
-                            &hash
-                        );
-
-                        if let Some(node_content) = node_content {
-                            return response200(
-                                serde_json::to_string(
-                                    &node_content
-                                ).unwrap()
-                            );
-                        }
-
-                        return response404(
-                            format!("Nie udało się przeczytać noda {}", hash.to_hex())
                         );
                     }
                 }

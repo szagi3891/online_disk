@@ -4,7 +4,8 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 
 import { Store } from '../Store';
-import { DirAdd } from './DirAdd';
+import { DirAddEmpty } from './Add/DirAddEmpty';
+import { FileAddEmpty } from './Add/FileAddEmpty';
 import { DirList } from './DirList';
 import { Path } from './Path';
 
@@ -38,7 +39,7 @@ export class App extends React.Component<PropsType> {
 
         if (last) {
             return (
-                <DirAdd store={store} dirItem={last} />
+                <DirAddEmpty store={store} dirItem={last} />
             );
         }
 
@@ -46,9 +47,17 @@ export class App extends React.Component<PropsType> {
     }
 
     _renderAddEmptyTextFile() {
-        return (
-            <div>Dodaj pusty plik tekstowy</div>
-        );
+        const { store } = this.props;
+        const pathDir = store.root.currentPathNodes.path;
+        const last = pathDir.last();
+
+        if (last) {
+            return (
+                <FileAddEmpty store={store} dirItem={last} />
+            );
+        }
+
+        return null;
     }
 
     _renderDirList() {

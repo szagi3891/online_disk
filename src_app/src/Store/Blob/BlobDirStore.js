@@ -4,7 +4,17 @@ import { List as IList, OrderedMap } from 'immutable';
 import type { NodeItemType } from '../Type';
 
 const getDir = (hash: string, path: IList<string>): Promise<OrderedMap<string, NodeItemType>> => {
-    return fetch(`/api/dir/${hash}/${path.join('/')}`)
+    const param = {
+        node_hash: hash,
+        path: path.toArray()
+    };
+
+    const fetchParam = {
+        method: 'POST',
+        body: JSON.stringify(param)
+    };
+
+    return fetch('/api/dir/list', fetchParam)
         .then(response => response.json())
         .then(response => OrderedMap(response.files));
 };
