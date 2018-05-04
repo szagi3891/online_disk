@@ -20,9 +20,6 @@ use hyper::{
 };
 use server::utils::{
     static_file::StaticFile,
-    match_str::{
-        convert_to_hash
-    },
     server::{
         ServerTrait,
         Server
@@ -107,28 +104,6 @@ fn url_match_first<'a>(path_chunk: &Vec<&'a str>, pattern: &'a str) -> bool {
     false
 }
 
-fn url_hash<'a>(path_chunk: &Vec<&'a str>) -> Option<(Hash, Vec<&'a str>)> {
-    let mut iter = path_chunk.iter();
-
-    let first: Option<&&'a str> = iter.next();
-    
-    if let Some(first) = first {
-        let hash = convert_to_hash(*first);
-
-        if let Some(hash) = hash {
-            let mut out = Vec::new();
-            for item in iter {
-                out.push(*item);
-            }
-            return Some((hash, out));
-
-        }
-    }
-
-    None
-}
-
-
 fn url_match<'a>(path_chunk: &Vec<&'a str>, pattern: &'a str) -> Option<Vec<&'a str>> {
     let mut iter = path_chunk.iter();
 
@@ -147,6 +122,70 @@ fn url_match<'a>(path_chunk: &Vec<&'a str>, pattern: &'a str) -> Option<Vec<&'a 
     None
 }
 
+struct UrlChunks<'a> {
+    method: &'a hyper::Method,
+    items: Vec<&'a str>,
+}
+
+impl<'a> UrlChunks<'a> {
+    fn new(method: &'a hyper::Method, req_path: &'a str) -> UrlChunks<'a> {
+        UrlChunks {
+            method: method,
+            items: split_path(req_path)
+        }
+    }
+
+    fn is_post_method(&self) -> bool {
+        self.method == &Method::Post
+    }
+
+    fn is_get_method(&self) -> bool {
+        self.method == &Method::Get
+    }
+
+    fn is_index(&self) -> bool {
+        self.items.len() == 0
+    }
+
+    fn check_chunks<'b>(&self, chunks: Vec<&'b str>) -> Option<Vec<&'a str>> {
+        let mut items_iter = self.items.iter();
+
+        for item in chunks.iter() {
+            if let Some(next_item) = items_iter.next() {
+                if **item == *(*next_item) {
+                    continue;
+                }
+            }
+
+            return None;
+        }
+
+        let mut out = Vec::new();
+
+        for item in items_iter {
+            out.push(*item);
+        }
+
+        return Some(out);
+    }
+
+    fn is_get<'b>(&self, chunks: Vec<&'b str>) -> Option<Vec<&'a str>> {
+        if self.is_get_method() {
+            return self.check_chunks(chunks);
+        }
+
+        None
+    }
+
+    fn is_post<'b>(&self, chunks: Vec<&'b str>) -> Option<Vec<&'a str>> {
+        if self.is_post_method() {
+            return self.check_chunks(chunks);
+        }
+
+        None
+    }
+}
+
 #[derive(Clone)]
 struct ServerApp {
     static_file: StaticFile,
@@ -157,25 +196,27 @@ impl ServerTrait for ServerApp {
     fn call(&self, req: Request, _handle: Handle) -> Box<Future<Item=Response, Error=hyper::Error>> {
         let (method, uri, _, _headers, body) = req.deconstruct();
 
-        let method_get = &method == &Method::Get;
-        let method_post = &method == &Method::Post;
         let req_path_new = uri.path();
 
         if req_path_new.len() > 1000 {
             return response400("Zapytanie za długie".to_owned());
         }
 
-        let path_chunks = split_path(req_path_new);
+        let uri_chunks = UrlChunks::new(&method, req_path_new);
 
-        if method_get && path_chunks.len() == 0 {
+        if uri_chunks.is_get_method() && uri_chunks.is_index() {
             return self.static_file.send_file("index.html");
         }
-    
-        if method_get {
-            if let Some(rest) = url_match(&path_chunks, "static") {
-                return self.static_file.send_file(&rest.as_slice().join("/"));
-            }
+
+        if let Some(rest) = uri_chunks.is_get(vec!["static"]) {
+            return self.static_file.send_file(&rest.as_slice().join("/"));
         }
+
+
+
+        let method_get = &method == &Method::Get;
+        let method_post = &method == &Method::Post;
+        let path_chunks = split_path(req_path_new);
 
         if let Some(rest) = url_match(&path_chunks, "api") {
             if method_get && url_match_first(&rest, "head") {
