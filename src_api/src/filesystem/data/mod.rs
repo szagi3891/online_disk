@@ -68,16 +68,6 @@ impl<T: KeyValue> FileSystemData<T> {
         }
     }
 
-    pub fn add_dir(&self, node: &Hash, target: (&[String], &Hash), name: &String) -> Option<Hash> {
-        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
-            let empty_dir_hash = self.key_value.set_blob(
-                &FileSystemDir::create_empty().to_blob()
-            );
-
-            node_dir.set_child(name, FileSystemNode::new_dir(empty_dir_hash));
-            node_dir
-        })
-    }
     //self.key_value.set_blob(&dir.to_blob())
 
     fn modify_node<TF>(&self, node: &Hash, target: (&[String], &Hash), modify_node_f: TF) -> Option<Hash>
@@ -108,11 +98,6 @@ impl<T: KeyValue> FileSystemData<T> {
         None
     }
 
-    pub fn create_file(&self, data: &[u8]) -> Hash {
-        let file = FileSystemFile::new_from_slice(data);
-        self.key_value.set_blob(file.ref_data())
-    }
-
     //TODO - do przywrócenia
     /*
     pub fn create_dir(&self, data: HashMap<String, Hash>) -> Hash {
@@ -131,6 +116,25 @@ impl<T: KeyValue> FileSystemData<T> {
     }
     */
 
+    pub fn add_file(&self, node: &Hash, target: (&[String], &Hash), name: &String, data: &[u8]) -> Option<Hash> {
+        let data_hash = self.create_file(data);
+        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
+            node_dir.set_child(name, FileSystemNode::new_file(data_hash));
+            node_dir
+        })
+    }
+
+    pub fn add_dir(&self, node: &Hash, target: (&[String], &Hash), name: &String) -> Option<Hash> {
+        let empty_dir_hash = self.key_value.set_blob(
+            &FileSystemDir::create_empty().to_blob()
+        );
+
+        self.modify_node(node, target, |mut node_dir: FileSystemDir| {
+            node_dir.set_child(name, FileSystemNode::new_dir(empty_dir_hash));
+            node_dir
+        })
+    }
+
     pub fn remove(&self, node: &Hash, target: (&[String], &Hash), name: &String) -> Option<Hash> {
         self.modify_node(node, target, |mut node_dir: FileSystemDir| {
             node_dir.remove_child(name);
@@ -143,6 +147,11 @@ impl<T: KeyValue> FileSystemData<T> {
             node_dir.rename_child(old_name, new_name);
             node_dir
         })
+    }
+
+    fn create_file(&self, data: &[u8]) -> Hash {
+        let file = FileSystemFile::new_from_slice(data);
+        self.key_value.set_blob(file.ref_data())
     }
 
     pub fn create_empty_dir(&self) -> Hash {

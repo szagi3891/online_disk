@@ -18,4 +18,8 @@ impl FileSystemNode {
     pub fn new_dir(hash: Hash) -> FileSystemNode {
         FileSystemNode::new(true, hash)
     }
+
+    pub fn new_file(hash: Hash) -> FileSystemNode {
+        FileSystemNode::new(false, hash)
+    }
 }

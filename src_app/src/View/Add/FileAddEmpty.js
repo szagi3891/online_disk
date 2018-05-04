@@ -25,7 +25,7 @@ export class FileAddEmpty extends React.Component<PropsType> {
         return (
             <div>
                 <input value={this.input_file} onChange={this._onChangeInput} />
-                <button onClick={this._onClickAddDir}>Dodaj pusty plik</button>
+                <button onClick={this._onClickAddDir}>Dodaj pusty plik tekstowy</button>
             </div>
         );
     }
@@ -38,16 +38,16 @@ export class FileAddEmpty extends React.Component<PropsType> {
     }
 
     _onClickAddDir = () => {
-        //const { dirItem } = this.props;
+        const { dirItem } = this.props;
 
-        console.info('Zaczynam dodawać puty plik', this.input_file);
-        /*
-        dirItem.addDir(this.input_folder).then(() => {
+        const newFileName = `${this.input_file}.txt`;
+
+        dirItem.addEmptyFile(newFileName).then(() => {
             console.info('Koniec dodawania');
         }).catch((error: mixed) => {
             console.error('Otrzymano błąd', error);
         });
-        */
+
         this.input_file = '';
     }
 }

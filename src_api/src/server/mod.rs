@@ -227,6 +227,45 @@ impl ServerTrait for ServerApp {
             );
         }
 
+        if uri_chunks.is_post(&["api", "add_empty_file"]).is_some() {
+            let filesystem = self.filesystem.clone();
+
+            return Box::new(
+                get_body_vec(body).and_then(move |buffer|{
+
+                    #[derive(Serialize, Deserialize, Debug)]
+                    struct Post {
+                        node_hash: String,
+                        path: Vec<String>,
+                        file_name: String,
+                    }
+
+                    let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
+
+                    match result {
+                        Ok(post) => {
+                            let hash = Hash::from_string(&post.node_hash);
+                            let result_add = filesystem.add_file(
+                                &post.path,
+                                &hash,
+                                &post.file_name,
+                                &[]
+                            );
+
+                            return response200(
+                                serde_json::to_string(
+                                    &filesystem.current_head()
+                                ).unwrap()
+                            );
+                        }
+                        Err(_) => {
+                            return response400("Problem ze zdekodowaniem parametrów /api/add_dir".to_string());
+                        }
+                    }
+                })
+            )
+        }
+
         if uri_chunks.is_post(&["api", "dir", "list"]).is_some() {
             let filesystem = self.filesystem.clone();
 

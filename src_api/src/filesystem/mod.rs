@@ -71,10 +71,11 @@ impl FileSystem {
         self.head.current()
     }
 
+    /*
     pub fn create_file(&self, data: &[u8]) -> Hash {
         self.data.create_file(data)
     }
-
+    */
 
     pub fn get_dir(&self, target_path: &[String], target_hash: &Hash) -> Option<FileSystemDir> {
         let current = self.head.current();
@@ -107,6 +108,16 @@ impl FileSystem {
         }
     }
     */
+
+    pub fn add_file(&self, target_path: &[String], target_hash: &Hash, name: &String, data: &[u8]) -> Result<(), ()> {
+        loop {
+            let current = self.head.current();
+            let head_new = self.data.add_file(&current.head, (target_path, target_hash), name, data);
+            if let Some(result) = self.try_replace_head(current.head, head_new) {
+                return result;
+            }
+        }
+    }
 
     pub fn add_dir(&self, target_path: &[String], target_hash: &Hash, name: &String) -> Result<(), ()> {
         loop {
