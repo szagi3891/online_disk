@@ -38,7 +38,7 @@ const dirListClassName = css({
 const ContentWrapper = glamorous.div({
     flexGrow: '1',
     flexShrink: '0',
-    marginLeft: '5px'
+    padding: '5px'
 });
 
 const OptionWrapper = glamorous.div({

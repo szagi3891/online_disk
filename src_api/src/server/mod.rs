@@ -3,16 +3,9 @@ pub mod utils;
 use std::path::{Path, PathBuf};
 use filesystem::FileSystem;
 
-use futures::{
-    self,
-    Stream,
-    future::Future
-};
+use futures::future::Future;
 use hyper::{
     self,
-    Method,
-    StatusCode,
-    header::ContentType,
     server::{
         Request,
         Response
@@ -23,135 +16,62 @@ use server::utils::{
     server::{
         ServerTrait,
         Server
+    },
+    url_router::UrlChunks,
+    response_helpers::{
+        response200,
+        response400,
+        response404,
+        response500,
+        get_body_vec
     }
 };
 use filesystem::utils::hash::Hash;
 use tokio_core::reactor::Handle;
 use futures_cpupool::CpuPool;
 use serde_json;
+use serde::{Serialize, Deserialize};
 
-                
-fn response400(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
-    let mut response = Response::new();
-    response.set_status(StatusCode::BadRequest);
-    response.set_body(body);
-    return Box::new(futures::future::ok(response));
+fn try_serialize<T>(data: &T, error_message: &str) -> Box<Future<Item=Response, Error=hyper::Error>> where T: Serialize {
+    match serde_json::to_string(data) {
+        Ok(data_string) => response200(data_string),
+        Err(err) => response500(
+            format!(
+                "serde_json serialize error in {} --> {}",
+                error_message,
+                err
+            )
+        )
+    }
 }
 
-fn response404(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
-    let mut response = Response::new();
-    response.set_status(StatusCode::NotFound);
-    response.set_body(body);
-    Box::new(futures::future::ok(response))
+fn try_decode<'a, T>(
+    buffer: &'a Vec<u8>,
+    error_message: &str
+) -> Result<T, Box<Future<Item=Response, Error=hyper::Error>>> where T: Deserialize<'a> {
+    let result: serde_json::Result<T> = serde_json::from_slice(&buffer);
+
+    match result {
+        Ok(post) => Ok(post),
+        Err(err) => Err(
+            response400(
+                format!(
+                    "serde_json deserialize error in {} --> {}",
+                    error_message,
+                    err
+                )
+            )
+        ),
+    }
 }
 
-fn response200(body: String) -> Box<Future<Item=Response, Error=hyper::Error>> {
-    Box::new(futures::future::ok(
-        Response::new()
-            .with_header(ContentType::json())
-            .with_status(StatusCode::Ok)
-            .with_body(body)
-    ))
-
-    //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
-}
-
-fn get_body_vec(body: hyper::Body) -> Box<Future<Item=Vec<u8>, Error=hyper::Error>> {
-    Box::new(
-        body
-            .collect()
-            .and_then(move |chunk| {
-                let mut buffer: Vec<u8> = Vec::new();
-                for i in chunk {
-                    buffer.append(&mut i.to_vec());
-                }
-                Ok(buffer)
-            })
-    )
-}
-
-/*
-    Tą strukturę zwracać w odpowiedzi na te requesty
-
-    GET /api/head/
-    POST /api/add_dir
-*/
-
-                                                                    //TODO - zamienić na slice (z typu Vec<&'a str>)
-
-fn split_path<'a>(req_path: &'a str) -> Vec<&'a str> {
-    let mut out = Vec::new();
-
-    for item in req_path.split('/') {
-        if item != "" {
-            out.push(item);
+macro_rules! try_decode_macro {
+    ($e:expr) => (
+        match $e {
+            Ok(post) => post,
+            Err(error_response) => return error_response,
         }
-    }
-    return out; 
-}
-
-struct UrlChunks<'a> {
-    method: &'a hyper::Method,
-    items: Vec<&'a str>,
-}
-
-impl<'a> UrlChunks<'a> {
-    fn new(method: &'a hyper::Method, req_path: &'a str) -> UrlChunks<'a> {
-        UrlChunks {
-            method: method,
-            items: split_path(req_path)
-        }
-    }
-
-    fn is_post(&self) -> bool {
-        self.method == &Method::Post
-    }
-
-    fn is_get(&self) -> bool {
-        self.method == &Method::Get
-    }
-
-    fn is_index(&self) -> bool {
-        self.items.len() == 0
-    }
-
-    fn check_chunks<'b>(&self, chunks: &[&'b str]) -> Option<Vec<&'a str>> {
-        let mut items_iter = self.items.iter();
-
-        for item in chunks.iter() {
-            if let Some(next_item) = items_iter.next() {
-                if **item == *(*next_item) {
-                    continue;
-                }
-            }
-
-            return None;
-        }
-
-        let mut out = Vec::new();
-
-        for item in items_iter {
-            out.push(*item);
-        }
-
-        return Some(out);
-    }
-
-    fn get<'b>(&self, chunks: &[&'b str]) -> Option<Vec<&'a str>> {
-        if self.is_get() {
-            return self.check_chunks(chunks);
-        }
-
-        None
-    }
-
-    fn post<'b>(&self, chunks: &[&'b str]) -> Option<Vec<&'a str>> {
-        if self.is_post() {
-            return self.check_chunks(chunks);
-        }
-
-        None
-    }
+    );
 }
 
 #[derive(Clone)]
@@ -181,10 +101,9 @@ impl ServerTrait for ServerApp {
         }
 
         if uri_chunks.get(&["api", "head"]).is_some() {
-            return response200(
-                serde_json::to_string(
-                    &self.filesystem.current_head()
-                ).unwrap()
+            return try_serialize(
+                &self.filesystem.current_head(),
+                "request GET /api/head"
             );
         }
 
@@ -201,28 +120,23 @@ impl ServerTrait for ServerApp {
                         path: Vec<String>
                     }
 
-                    let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
+                    let post = try_decode_macro!(
+                        try_decode::<Post>(&buffer, "request POST /api/add_dir")
+                    );
 
-                    match result {
-                        Ok(post) => {
-                            let hash = Hash::from_string(&post.node_hash);
+                    let hash = Hash::from_string(&post.node_hash);
 
-                            let result_add = filesystem.add_dir(
-                                &post.path,
-                                &hash,
-                                &post.dir
-                            );
+                    let result_add = filesystem.add_dir(
+                        &post.path,
+                        &hash,
+                        &post.dir
+                    );
 
-                            return response200(
-                                serde_json::to_string(
-                                    &filesystem.current_head()
-                                ).unwrap()
-                            );
-                        }
-                        Err(_) => {
-                            return response400("Problem ze zdekodowaniem parametrów /api/add_dir".to_string());
-                        }
-                    }
+                    return response200(
+                        serde_json::to_string(
+                            &filesystem.current_head()
+                        ).unwrap()
+                    );
                 })
             );
         }
@@ -240,28 +154,23 @@ impl ServerTrait for ServerApp {
                         file_name: String,
                     }
 
-                    let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
+                    let post = try_decode_macro!(
+                        try_decode::<Post>(&buffer, "request POST /api/add_empty_file")
+                    );
 
-                    match result {
-                        Ok(post) => {
-                            let hash = Hash::from_string(&post.node_hash);
-                            let result_add = filesystem.add_file(
-                                &post.path,
-                                &hash,
-                                &post.file_name,
-                                &[]
-                            );
+                    let hash = Hash::from_string(&post.node_hash);
+                    let result_add = filesystem.add_file(
+                        &post.path,
+                        &hash,
+                        &post.file_name,
+                        &[]
+                    );
 
-                            return response200(
-                                serde_json::to_string(
-                                    &filesystem.current_head()
-                                ).unwrap()
-                            );
-                        }
-                        Err(_) => {
-                            return response400("Problem ze zdekodowaniem parametrów /api/add_empty_file".to_string());
-                        }
-                    }
+                    return response200(
+                        serde_json::to_string(
+                            &filesystem.current_head()
+                        ).unwrap()
+                    );
                 })
             )
         }
@@ -278,33 +187,28 @@ impl ServerTrait for ServerApp {
                         path: Vec<String>
                     }
 
-                    let result: serde_json::Result<Post> = serde_json::from_slice(&buffer);
+                    let post = try_decode_macro!(
+                        try_decode::<Post>(&buffer, "request POST /api/dir/list")
+                    );
 
-                    match result {
-                        Ok(post) => {
-                            let hash = Hash::from_string(&post.node_hash);
+                    let hash = Hash::from_string(&post.node_hash);
 
-                            let node_content = filesystem.get_dir(
-                                &post.path,
-                                &hash
-                            );
+                    let node_content = filesystem.get_dir(
+                        &post.path,
+                        &hash
+                    );
 
-                            if let Some(node_content) = node_content {
-                                return response200(
-                                    serde_json::to_string(
-                                        &node_content
-                                    ).unwrap()
-                                );
-                            }
-
-                            return response404(
-                                format!("Nie udało się przeczytać noda {}", hash.to_hex())
-                            );
-                        }
-                        Err(_) => {
-                            return response400("Problem ze zdekodowaniem parametrów /api/add_dir".to_string());
-                        }
+                    if let Some(node_content) = node_content {
+                        return response200(
+                            serde_json::to_string(
+                                &node_content
+                            ).unwrap()
+                        );
                     }
+
+                    return response404(
+                        format!("Nie udało się przeczytać noda {}", hash.to_hex())
+                    );
                 })
             );
         }
