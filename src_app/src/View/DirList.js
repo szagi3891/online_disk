@@ -7,6 +7,7 @@ import { DirItem } from '../Store/Root/DirItem';
 import { DirListItem } from './DirListItem';
 
 type PropsType = {|
+    className: string,
     store: Store,
     dirItem: DirItem
 |};
@@ -14,13 +15,13 @@ type PropsType = {|
 @observer
 export class DirList extends React.Component<PropsType> {
     render(): React.Node {
-        const { store, dirItem } = this.props;
+        const { className, store, dirItem } = this.props;
 
         const childList = dirItem.childList;
 
         if (!childList) {
             return (
-                <div>
+                <div className={className}>
                     <i>Loading...</i>
                 </div>
             );
@@ -51,7 +52,7 @@ export class DirList extends React.Component<PropsType> {
         }
         
         return (
-            <div>
+            <div className={className}>
                 { out }
             </div>
         );

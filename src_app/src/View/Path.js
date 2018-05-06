@@ -11,14 +11,15 @@ const Main = glamorous.div({
 });
 
 type PropsType = {|
-    store: Store
+    store: Store,
+    className: string
 |};
 
 @observer
 export class Path extends React.Component<PropsType> {
 
     render(): React.Node {
-        const { store } = this.props;
+        const { store, className } = this.props;
         const currentPathNodes = store.root.currentPathNodes;
 
         const out = [];
@@ -50,7 +51,7 @@ export class Path extends React.Component<PropsType> {
         }
 
         return (
-            <Main>
+            <Main className={className}>
                 { out }
             </Main>
         );

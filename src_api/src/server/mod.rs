@@ -103,11 +103,11 @@ impl<'a> UrlChunks<'a> {
         }
     }
 
-    fn is_post_method(&self) -> bool {
+    fn is_post(&self) -> bool {
         self.method == &Method::Post
     }
 
-    fn is_get_method(&self) -> bool {
+    fn is_get(&self) -> bool {
         self.method == &Method::Get
     }
 
@@ -137,16 +137,16 @@ impl<'a> UrlChunks<'a> {
         return Some(out);
     }
 
-    fn is_get<'b>(&self, chunks: &[&'b str]) -> Option<Vec<&'a str>> {
-        if self.is_get_method() {
+    fn get<'b>(&self, chunks: &[&'b str]) -> Option<Vec<&'a str>> {
+        if self.is_get() {
             return self.check_chunks(chunks);
         }
 
         None
     }
 
-    fn is_post<'b>(&self, chunks: &[&'b str]) -> Option<Vec<&'a str>> {
-        if self.is_post_method() {
+    fn post<'b>(&self, chunks: &[&'b str]) -> Option<Vec<&'a str>> {
+        if self.is_post() {
             return self.check_chunks(chunks);
         }
 
@@ -172,15 +172,15 @@ impl ServerTrait for ServerApp {
 
         let uri_chunks = UrlChunks::new(&method, req_path_new);
 
-        if uri_chunks.is_get_method() && uri_chunks.is_index() {
+        if uri_chunks.is_get() && uri_chunks.is_index() {
             return self.static_file.send_file("index.html");
         }
 
-        if let Some(rest) = uri_chunks.is_get(&["static"]) {
+        if let Some(rest) = uri_chunks.get(&["static"]) {
             return self.static_file.send_file(&rest.as_slice().join("/"));
         }
 
-        if uri_chunks.is_get(&["api", "head"]).is_some() {
+        if uri_chunks.get(&["api", "head"]).is_some() {
             return response200(
                 serde_json::to_string(
                     &self.filesystem.current_head()
@@ -188,7 +188,7 @@ impl ServerTrait for ServerApp {
             );
         }
 
-        if uri_chunks.is_post(&["api", "add_dir"]).is_some() {
+        if uri_chunks.post(&["api", "add_dir"]).is_some() {
             let filesystem = self.filesystem.clone();
 
             return Box::new(
@@ -227,7 +227,7 @@ impl ServerTrait for ServerApp {
             );
         }
 
-        if uri_chunks.is_post(&["api", "add_empty_file"]).is_some() {
+        if uri_chunks.post(&["api", "add_empty_file"]).is_some() {
             let filesystem = self.filesystem.clone();
 
             return Box::new(
@@ -259,14 +259,14 @@ impl ServerTrait for ServerApp {
                             );
                         }
                         Err(_) => {
-                            return response400("Problem ze zdekodowaniem parametrów /api/add_dir".to_string());
+                            return response400("Problem ze zdekodowaniem parametrów /api/add_empty_file".to_string());
                         }
                     }
                 })
             )
         }
 
-        if uri_chunks.is_post(&["api", "dir", "list"]).is_some() {
+        if uri_chunks.post(&["api", "dir", "list"]).is_some() {
             let filesystem = self.filesystem.clone();
 
             return Box::new(
@@ -333,9 +333,4 @@ pub fn start_server(data_path: &PathBuf, static_path: &PathBuf, addr: String) {
             filesystem: filesystem.clone()
         }
     });
-
-    /*
-    let content_hash = fs.create_file(&"bla bla bla bla 2111".as_bytes());
-    fs.add(&Vec::new(), &fs.current_head(), &"jakis plikads".into(), &content_hash).unwrap();
-    */
 }
