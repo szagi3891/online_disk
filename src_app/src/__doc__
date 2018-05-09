@@ -1,0 +1,30 @@
+const objectURL = window.URL.createObjectURL(targetFile);       //File
+mediaElem.src = objectURL;
+window.URL.revokeObjectURL(objectURL: string);
+
+      var reader = new FileReader();
+
+      reader.addEventListener("load", function () {
+        var image = new Image();
+        image.height = 100;
+        image.title = file.name;
+        image.src = this.result;
+        preview.appendChild( image );
+      }, false);
+
+      reader.readAsDataURL(file);
+
+
+const readFile = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+
+      var reader = new FileReader();
+
+      reader.addEventListener("load", function () {
+        resolve(this.result);
+      }, false);
+
+      reader.readAsDataURL(file);
+        
+    });
+}

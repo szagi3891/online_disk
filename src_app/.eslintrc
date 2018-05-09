@@ -13,10 +13,6 @@
     "globals": {
         "SyntheticEvent": false,
         "SyntheticKeyboardEvent": false,
-        "$Keys": false,
-        "$Shape": false,
-        "$PropertyType": false,
-        "$ElementType": false,
         "expect": false,
         "it": false,
         "describe": false

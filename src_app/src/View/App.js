@@ -11,6 +11,8 @@ import { DirAddEmpty } from './Add/DirAddEmpty';
 import { FileAddEmpty } from './Add/FileAddEmpty';
 import { DirList } from './DirList';
 import { Path } from './Path';
+import { convertDropEvent } from '../Utils/DropFiles';
+import type { OnDropEventType, DirType } from '../Utils/DropFiles';
 
 const AppWrapper = glamorous.div({
     display: 'flex',
@@ -143,7 +145,7 @@ export class App extends React.Component<PropsType> {
 
     _renderContent(): React.Node {
         return (
-            <ContentWrapper>
+            <ContentWrapper onDrop={this._onDrop} onDragOver={this._onDragOver}>
                 dasdas
             </ContentWrapper>
         );
@@ -185,5 +187,33 @@ export class App extends React.Component<PropsType> {
         }
 
         return null;
+    }
+
+    _showDir(name: string, dir: DirType) {
+        console.group(name);
+        for (const [localName, value] of dir.entries()) {
+            if (value instanceof File) {
+                console.info(localName, value);
+            } else {
+                this._showDir(localName, value);
+            }
+        }
+        console.groupEnd();
+    }
+    _onDrop = (event: OnDropEventType) => {
+        event.preventDefault();
+
+        convertDropEvent(event).then((result: DirType) => {
+            console.info('Drop result', result);
+            this._showDir('.', result);
+        }).catch((error: mixed) => {
+            console.info('error wrzucania ...', error);
+        });
+    }
+
+    _onDragOver = (event: {}) => {
+        //$FlowFixMe
+        event.preventDefault();
+        //console.info('BBB', event);
     }
 }

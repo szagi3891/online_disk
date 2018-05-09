@@ -36,6 +36,57 @@ const addEmptyFile = (node_hash: string, path: IList<string>, file_name: string)
         .then(response => response.json());
 };
 
+/*
+const appendBuffer = (buffer1: ArrayBuffer, buffer2: ArrayBuffer): ArrayBuffer => {
+    const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+    tmp.set(new Uint8Array(buffer1), 0);
+    tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+    return tmp.buffer;
+};
+
+const convertFile = (file: File): Promise<ArrayBuffer> => new Promise((resolve) => {
+    const reader = new FileReader();
+
+    reader.addEventListener('load', function (e) {
+    resolve(this.result);
+    //e.target.result
+    }, false);
+
+    reader.readAsArrayBuffer(file);
+});
+*/
+
+/*
+var b1 = new Uint8Array([0x01, 0x02, 0x03]);
+var b2 = new Uint8Array([0x04, 0x05, 0x06]);
+var b3 = new Uint8Array([0x07, 0x08, 0x09]);
+
+// combine all three arrays into a new array buffer
+// if you need the ArrayBuffer instead of a TypedArray, it's at `combined.buffer
+// NOTE: square brackets in the Uint8Array constructor -- Uint8Array([...])
+var combined = new Uint8Array([
+    ...b1,
+    ...b2,
+    ...b3
+]);
+*/
+
+/*
+type BodyInit = string | URLSearchParams | FormData | Blob | ArrayBuffer | $ArrayBufferView;
+declare function fetch(input: RequestInfo, init?: RequestOptions): Promise<Response>;
+*/
+
+/*
+    //https://stackoverflow.com/questions/6965107/converting-between-strings-and-arraybuffers
+const stringToArrayBuffer = (text: string): ArrayBuffer => {
+    const enc = new TextEncoder(); // always utf-8
+    return enc.encode(text).buffer;
+};
+*/
+
+//https://github.com/react-dropzone/react-dropzone/blob/master/src/index.js
+
+//TODO - fetch przyjmuje arrayBuffer
 
 export class DirItem {
     +_parent: DirItem | null;
