@@ -85,3 +85,9 @@ function convertFileSystemEntryList(items: Array<FileSystemEntry>): Promise<DirT
 
     return Promise.all(outPromises).then((): DirType => outMap);
 }
+
+/*
+https://github.com/facebook/flow/blob/v0.70.0/lib/dom.js#L63
+https://www.meziantou.net/2017/09/04/upload-files-and-directories-using-an-input-drag-and-drop-or-copy-and-paste-with
+https://stackoverflow.com/questions/3590058/does-html5-allow-drag-drop-upload-of-folders-or-a-folder-tree
+*/
