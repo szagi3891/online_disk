@@ -32,16 +32,16 @@ use futures_cpupool::CpuPool;
 use serde_json;
 use serde::{Serialize, Deserialize};
 
-fn try_serialize<T>(data: &T, error_message: &str) -> Box<Future<Item=Response, Error=hyper::Error>> where T: Serialize {
+fn try_serialize(data: &impl Serialize, error_message: &str) -> Box<Future<Item=Response, Error=hyper::Error>> {
     match serde_json::to_string(data) {
-        Ok(data_string) => response200(data_string),
-        Err(err) => response500(
+        Ok(data_string) => Box::new(response200(data_string)),
+        Err(err) => Box::new(response500(
             format!(
                 "serde_json serialize error in {} --> {}",
                 error_message,
                 err
             )
-        )
+        ))
     }
 }
 
@@ -54,13 +54,13 @@ fn try_decode<'a, T>(
     match result {
         Ok(post) => Ok(post),
         Err(err) => Err(
-            response400(
+            Box::new(response400(
                 format!(
                     "serde_json deserialize error in {} --> {}",
                     error_message,
                     err
                 )
-            )
+            ))
         ),
     }
 }
@@ -87,24 +87,24 @@ impl ServerTrait for ServerApp {
         let req_path_new = uri.path();
 
         if req_path_new.len() > 1000 {
-            return response400("Zapytanie za długie".to_owned());
+            return Box::new(response400("Zapytanie za długie".to_owned()));
         }
 
         let uri_chunks = UrlChunks::new(&method, req_path_new);
 
         if uri_chunks.is_get() && uri_chunks.is_index() {
-            return self.static_file.send_file("index.html");
+            return Box::new(self.static_file.send_file("index.html"));
         }
 
         if let Some(rest) = uri_chunks.get(&["static"]) {
-            return self.static_file.send_file(&rest.as_slice().join("/"));
+            return Box::new(self.static_file.send_file(&rest.as_slice().join("/")));
         }
 
         if uri_chunks.get(&["api", "head"]).is_some() {
-            return try_serialize(
+            return Box::new(try_serialize(
                 &self.filesystem.current_head(),
                 "request GET /api/head"
-            );
+            ));
         }
 
         if uri_chunks.post(&["api", "add_dir"]).is_some() {
@@ -132,11 +132,11 @@ impl ServerTrait for ServerApp {
                         &post.dir
                     );
 
-                    return response200(
+                    return Box::new(response200(
                         serde_json::to_string(
                             &filesystem.current_head()
                         ).unwrap()
-                    );
+                    ));
                 })
             );
         }
@@ -166,11 +166,11 @@ impl ServerTrait for ServerApp {
                         &[]
                     );
 
-                    return response200(
+                    return Box::new(response200(
                         serde_json::to_string(
                             &filesystem.current_head()
                         ).unwrap()
-                    );
+                    ));
                 })
             )
         }
@@ -199,21 +199,21 @@ impl ServerTrait for ServerApp {
                     );
 
                     if let Some(node_content) = node_content {
-                        return response200(
+                        return Box::new(response200(
                             serde_json::to_string(
                                 &node_content
                             ).unwrap()
-                        );
+                        ));
                     }
 
-                    return response404(
+                    return Box::new(response404(
                         format!("Nie udało się przeczytać noda {}", hash.to_hex())
-                    );
+                    ));
                 })
             );
         }
 
-        response404("404 ...".to_string())
+        Box::new(response404("404 ...".to_string()))
     }
 }
 

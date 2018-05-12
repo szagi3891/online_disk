@@ -74,18 +74,18 @@ impl StaticFile {
     }
 
 
-    pub fn send_file(&self, file_path: &str) -> Box<Future<Item=Response, Error=hyper::Error>> {
+    pub fn send_file(&self, file_path: &str) -> impl Future<Item=Response, Error=hyper::Error> {
         let index_result = self.to_response(file_path);
 
         match index_result {
             Ok(mut response) => {
                 set_header(&mut response, file_path);
-                return Box::new(futures::future::ok(response));
+                return futures::future::ok(response);
             },
             Err(_err) => {
                 let mut resp = Response::new()
                     .with_status(StatusCode::NotFound);
-                return Box::new(futures::future::ok(resp));
+                return futures::future::ok(resp);
             }
         }
 
