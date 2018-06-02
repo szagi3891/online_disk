@@ -145,7 +145,7 @@ export class App extends React.Component<PropsType> {
 
     _renderContent(): React.Node {
         return (
-            <ContentWrapper onDrop={this._onDrop} onDragOver={this._onDragOver}>
+            <ContentWrapper onDrop={this._onDrop}>
                 dasdas
             </ContentWrapper>
         );
@@ -200,6 +200,7 @@ export class App extends React.Component<PropsType> {
         }
         console.groupEnd();
     }
+
     _onDrop = (event: OnDropEventType) => {
         event.preventDefault();
 
@@ -209,11 +210,5 @@ export class App extends React.Component<PropsType> {
         }).catch((error: mixed) => {
             console.info('error wrzucania ...', error);
         });
-    }
-
-    _onDragOver = (event: {}) => {
-        //$FlowFixMe
-        event.preventDefault();
-        //console.info('BBB', event);
     }
 }

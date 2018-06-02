@@ -28,3 +28,21 @@ const readFile = (file: File): Promise<string> => {
         
     });
 }
+
+
+https://parceljs.org/code_splitting.html
+
+    /*
+    import('./test_import').then((page) => {
+        page.render('dadas');
+    }).catch((err: mixed) => {
+        console.info('Error', err);
+    });
+    */
+
+  test_import.js
+
+  //@flow
+export const render = (arg: string) => {
+    console.info('REnder exec', arg);
+};
