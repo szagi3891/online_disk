@@ -1,94 +1,91 @@
 use hyper;
 use hyper::Response;
 use std::path::{PathBuf, Path};
-use std::fs::File;
-use std::io::Error;
-use tokio_core::reactor::Handle;
-use futures_cpupool::CpuPool;
-use futures::{self, Future, Stream, Sink, Poll, Async};
-use hyper::{Chunk, Body, StatusCode};
+use futures::{self, Future};
+use hyper::{Body, StatusCode};
 use server::utils::set_header::set_header;
-use std::io::{Read};
-use std::{mem};
+use tokio_fs::{
+    self,
+    File
+};
+use tokio_io::io::read_to_end;
+use server::utils::response_helpers::response404;
 
-use futures::sync::mpsc::SendError;
+fn read_file(file: File) -> Box<Future<Item=Response<Body>, Error=hyper::Error> + Send> {
+    let buff: Vec<u8> = Vec::new();
 
-/// A stream that produces Hyper chunks from a file.
-struct FileChunkStream(File);
-impl Stream for FileChunkStream {
-    type Item = Result<Chunk, hyper::Error>;
-    type Error = SendError<Self::Item>;
-
-    fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-        // TODO: non-blocking read
-        let mut buf: [u8; 16384] = unsafe { mem::uninitialized() };
-        match self.0.read(&mut buf) {
-            Ok(0) => Ok(Async::Ready(None)),
-            Ok(size) => Ok(Async::Ready(Some(Ok(
-                Chunk::from(buf[0..size].to_owned())
-            )))),
-            Err(err) => Ok(Async::Ready(Some(Err(hyper::Error::Io(err))))),
-        }
-    }
+    Box::new(
+        read_to_end(file, buff).and_then(|(_file, buff)|{
+            futures::future::ok(
+                Response::builder()
+                    .status(StatusCode::OK)
+                    .body(buff.into())
+                    .unwrap()
+            )
+        }).or_else(|_err| {
+            response404("404 file1".into())
+        })
+    )
 }
+
 
 #[derive(Clone)]
 pub struct StaticFile {
-    handle: Handle,
     base_dir: PathBuf,
-    cpu_pool: CpuPool,
 }
 
 impl StaticFile {
-    pub fn new(handle: Handle, base_dir: &Path, cpu_pool: CpuPool) -> StaticFile {
+    pub fn new(base_dir: &Path) -> StaticFile {
         StaticFile {
-            handle: handle,
             base_dir: base_dir.to_path_buf(),
-            cpu_pool: cpu_pool,
         }
     }
 
-    fn to_response(&self, rest: &str) -> Result<Response, Error> {
-        let mut path_buf = self.base_dir.clone();
-        path_buf.extend(Path::new(rest));
+    fn to_response(&self, file_path: &str) -> Box<Future<Item=Response<Body>, Error=hyper::Error> + Send> {
+        let full_path = self.get_file_path(file_path);
 
-        println!("Próbuję przeczytać plik {:?}", path_buf);
+        println!("Próbuję przeczytać plik {:?}", full_path);
 
-        let file = match File::open(path_buf) {
-            Ok(file) => file,
-            Err(err) => return Err(err),
-        };
+        let ff = tokio_fs::file::File::open(full_path);
+        //hyper::Error::new(hyper::error::Kind::io, None)
+        //let ff2 = ff.map_err(|err| err.into());
+        //let ff2 = ff.map_err(hyper::Error::from);
+        let ff2 = ff.map_err(|e| panic!("dada") /*eprintln!("server error: {}", e)*/ );
 
-        let (sender, body) = Body::pair();
-        self.handle.spawn(
-            self.cpu_pool.spawn(
-                sender.send_all(FileChunkStream(file))
-                    .map(|_| ())
-                    .map_err(|_| ())
-            )
-        );
+        let aa = ff2.and_then(|file|{
+                read_file(file)
+            });
 
-        let mut res = Response::new();
-        res.set_body(body);
-        return Ok(res);
+        Box::new(aa)
+        //Box::new(aa
+            /* .err_map(|err| {
+                //Ok(response404("404 file2".into()))
+                hyper::Error::new(hyper::Error::new_io(err))
+            })*/
+        //)
     }
 
+    fn get_file_path(&self, file_path: &str) -> PathBuf {
+        let mut path_buf = self.base_dir.clone();
+        path_buf.extend(Path::new(file_path));
+        path_buf        
+    }
 
-    pub fn send_file(&self, file_path: &str) -> impl Future<Item=Response, Error=hyper::Error> {
+    pub fn send_file(&self, file_path: &str) -> Box<Future<Item=Response<Body>, Error=hyper::Error> + Send> {
         let index_result = self.to_response(file_path);
 
-        match index_result {
-            Ok(mut response) => {
-                set_header(&mut response, file_path);
-                return futures::future::ok(response);
-            },
-            Err(_err) => {
-                let mut resp = Response::new()
-                    .with_status(StatusCode::NotFound);
-                return futures::future::ok(resp);
-            }
-        }
+        let file_path = file_path.to_string();
 
+        Box::new(
+            index_result.and_then(move |mut result|{
+                Box::new(
+                    futures::future::ok(
+                        set_header(result, file_path.as_str())
+                    )
+                )
+            }).or_else(|_error|{
+                response404("404 file3".into())
+            })
+        )
     }
-
 }

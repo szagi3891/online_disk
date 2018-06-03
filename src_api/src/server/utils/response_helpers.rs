@@ -6,42 +6,56 @@ use futures::{
 use hyper::{
     self,
     StatusCode,
+    Response,
+    Body,
+                            //TODO
+    /*
     header::ContentType,
     server::{
         Response
     }
+    */
 };
 
-pub fn response200(body: String) -> impl Future<Item=Response, Error=hyper::Error> {
+use server::utils::set_header::{
+    set_content_type_html,
+    set_content_type_json
+};
+
+pub fn response200(body: String) -> impl Future<Item=Response<Body>, Error=hyper::Error> {
     futures::future::ok(
-        Response::new()
-            .with_header(ContentType::json())
-            .with_status(StatusCode::Ok)
-            .with_body(body)
+        set_content_type_json(
+            Response::builder()
+                .status(StatusCode::OK)
+                .body(body.into())
+                .unwrap()
+        )
     )
-
-    //https://github.com/polachok/hyper-json-server/blob/master/src/server.rs
 }
 
-pub fn response400(body: String) -> impl Future<Item=Response, Error=hyper::Error> {
-    let mut response = Response::new();
-    response.set_status(StatusCode::BadRequest);
-    response.set_body(body);
-    futures::future::ok(response)
+pub fn response400(body: String) -> impl Future<Item=Response<Body>, Error=hyper::Error> {
+    futures::future::ok(Response::builder()
+        .status(StatusCode::BAD_REQUEST)
+        .body(body.into())
+        .unwrap())
 }
 
-pub fn response404(body: String) -> impl Future<Item=Response, Error=hyper::Error> {
-    let mut response = Response::new();
-    response.set_status(StatusCode::NotFound);
-    response.set_body(body);
-    futures::future::ok(response)
+pub fn response404(body: String) -> impl Future<Item=Response<Body>, Error=hyper::Error> {
+    futures::future::ok(
+        set_content_type_html(
+            Response::builder()
+                .status(StatusCode::NOT_FOUND)
+                .body(body.into())
+                .unwrap()
+        )
+    )
 }
 
-pub fn response500(body: String) -> impl Future<Item=Response, Error=hyper::Error> {
-    let mut response = Response::new();
-    response.set_status(StatusCode::InternalServerError);
-    response.set_body(body);
-    futures::future::ok(response)
+pub fn response500(body: String) -> impl Future<Item=Response<Body>, Error=hyper::Error> {
+    futures::future::ok(Response::builder()
+        .status(StatusCode::INTERNAL_SERVER_ERROR)
+        .body(body.into())
+        .unwrap())
 }
 
 pub fn get_body_vec(body: hyper::Body) -> impl Future<Item=Vec<u8>, Error=hyper::Error> {

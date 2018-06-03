@@ -2,7 +2,6 @@ use hyper::{
     self,
     Method
 };
-
                                                                     //TODO - zamienić na slice (z typu Vec<&'a str>)
 
 fn split_path<'a>(req_path: &'a str) -> Vec<&'a str> {
@@ -30,11 +29,11 @@ impl<'a> UrlChunks<'a> {
     }
 
     pub fn is_post(&self) -> bool {
-        self.method == &Method::Post
+        self.method == &Method::POST
     }
 
     pub fn is_get(&self) -> bool {
-        self.method == &Method::Get
+        self.method == &Method::GET
     }
 
     pub fn is_index(&self) -> bool {

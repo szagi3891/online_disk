@@ -9,7 +9,8 @@ extern crate chrono;
 extern crate hyper;
 extern crate futures;
 extern crate tokio_core;
-extern crate futures_cpupool;
+extern crate tokio_fs;
+extern crate tokio_io;
 
 use std::env;
 use std::path::{Path, PathBuf};
