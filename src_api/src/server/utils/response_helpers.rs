@@ -8,13 +8,6 @@ use hyper::{
     StatusCode,
     Response,
     Body,
-                            //TODO
-    /*
-    header::ContentType,
-    server::{
-        Response
-    }
-    */
 };
 
 use server::utils::set_header::{

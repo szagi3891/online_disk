@@ -16,7 +16,7 @@ use server::utils::{
         response500,
         get_body_vec
     },
-    static_file::StaticFile
+    static_file::send_static_file
 };
 use filesystem::utils::hash::Hash;
 use serde_json;
@@ -68,7 +68,7 @@ macro_rules! try_decode_macro {
     );
 }
 
-fn process_request(req: Request<Body>, filesystem: &FileSystem, static_path: &PathBuf, static_file: &StaticFile) -> ResponseFuture {
+fn process_request(req: Request<Body>, filesystem: &FileSystem, static_path: &PathBuf) -> ResponseFuture {
     let (req_parts, body) = req.into_parts();
 
     let req_path_new = req_parts.uri.path();
@@ -88,11 +88,14 @@ fn process_request(req: Request<Body>, filesystem: &FileSystem, static_path: &Pa
     let uri_chunks = UrlChunks::new(&req_parts.method, req_path_new);
 
     if uri_chunks.is_get() && uri_chunks.is_index() {
-        return Box::new(static_file.send_file("index.html"));
+        return send_static_file(&static_path, "index.html");
     }
 
     if let Some(rest) = uri_chunks.get(&["static"]) {
-        return Box::new(static_file.send_file(&rest.as_slice().join("/")));
+        return send_static_file(
+            &static_path,
+            &rest.as_slice().join("/")
+        );
     }
 
     if uri_chunks.get(&["api", "head"]).is_some() {
@@ -221,17 +224,15 @@ pub fn start_server(data_path: &PathBuf, static_path: &PathBuf, addr: String) {
 
     let static_path = (*static_path).clone();
     let filesystem = FileSystem::new(data_path);
-    let static_file = StaticFile::new(Path::new(&static_path));             //TODO - scalić static_path i static_file w jeden byt
 
     let server = Server::bind(&server_addr)
         .serve(move || {
             let filesystem = filesystem.clone();
             let static_path = static_path.clone();
-            let static_file = static_file.clone();
 
             service_fn(
                 move |req: Request<Body>| -> ResponseFuture {
-                    process_request(req, &filesystem, &static_path, &static_file)
+                    process_request(req, &filesystem, &static_path)
                 }
             )
         })
