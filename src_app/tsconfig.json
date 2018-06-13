@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"target": "es5",
+		"module": "commonjs",
+		"strict": true,
+		"jsx": "react",
+		"sourceMap": true,
+		"experimentalDecorators": true,
+		"downlevelIteration": true,
+		"lib": ["dom", "es6", "esnext"]
+	}
+}

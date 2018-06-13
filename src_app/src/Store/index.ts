@@ -1,13 +1,11 @@
-//@flow
-
 import { RootStore } from './Root/RootStore';
 import { HeadStore } from './HeadStore';
 import { PathStore } from './PathStore';
 
 export class Store {
-    +head: HeadStore;
-    +path: PathStore;
-    +root: RootStore;
+    readonly head: HeadStore;
+    readonly path: PathStore;
+    readonly root: RootStore;
 
     constructor() {
         this.head = new HeadStore();

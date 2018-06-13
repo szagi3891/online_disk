@@ -1,39 +1,38 @@
-//@flow
-
 import * as React from 'react';
 import { List as IList } from 'immutable';
 import { observer } from 'mobx-react';
-import glamorous from 'glamorous';
+import styled from 'react-emotion';
 import { Store } from '../Store';
+//@ts-ignore TODO
 import rgba from 'hex-rgba';
 import { DirListItemName } from './DirListItemName';
 
-const PathItemBox = glamorous.span({
-    paddingRight: '5px'
-});
+const PathItemBox = styled('span')`
+    paddingRight: 5px;
+`;
 
-const PathItemNoActive = glamorous(PathItemBox)({
-    cursror: 'default'
-});
+const PathItemNoActive = styled(PathItemBox)`
+    cursror: default;
+`;
 
-const PathItemSpanClick = glamorous(PathItemBox)({
-    cursor: 'pointer',
-    color: rgba('#0000ff', 50),
+const PathItemSpanClick = styled(PathItemBox)`
+    cursor: pointer;
+    color: ${rgba('#0000ff', 50)};
     ':hover': {
-        color: rgba('#0000ff', 25)
+        color: ${rgba('#0000ff', 25)};
     }
-});
+`;
 
-type PropsType = {|
+type PropsType = {
     store: Store,
     caption: string,
     path: IList<string>,
-    idDir: bool
-|};
+    idDir: boolean
+}
 
 @observer
 export class PathItem extends React.Component<PropsType> {
-    render(): React.Node {
+    render() {
         const { path, caption, idDir, store } = this.props;
 
         const hasCurrentPath = store.path.hasCurrentSet(path);

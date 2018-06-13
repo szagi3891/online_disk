@@ -1,7 +1,6 @@
-//@flow
 import 'isomorphic-fetch';
 import * as React from 'react';
-import ReactDOM from 'react-dom';
+import * as ReactDOM from 'react-dom';
 
 import { Store } from './Store';
 import { App } from './View/App';

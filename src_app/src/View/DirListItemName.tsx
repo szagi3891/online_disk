@@ -1,29 +1,26 @@
-//@flow
-
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import glamorous from 'glamorous';
-//import rgba from 'hex-rgba';
+import { css } from 'emotion';
+import styled from 'react-emotion';
 import { DirIcon } from './Icon/DirIcon';
 import { FileIcon } from './Icon/FileIcon';
-import { css } from 'glamor';
 
-const Main = glamorous.div({
-    display: 'flex'
-});
+const Main = styled('div')`
+    display: flex;
+`;
 
-const DivMain = glamorous.div({
-    flexShrink: '0'
-});
+const DivMain = styled('div')`
+    flexShrink: 0;
+`;
 
-const dirClass = css({
-    flexShrink: '0',
-    width: '20px',
-    height: '20px',
-    marginRight: '5px'
-});
+const dirClass = css`
+    flexShrink: 0;
+    width: 20px;
+    height: 20px;
+    marginRight: 5px;
+`;
 
-const renderIcon = (isDir: bool) => {
+const renderIcon = (isDir: boolean) => {
     if (isDir) {
         return (
             <DirIcon className={dirClass} />
@@ -35,10 +32,10 @@ const renderIcon = (isDir: bool) => {
     );
 };
 
-type PropsType = {|
+interface PropsType {
     name: string,
-    isDir: bool,
-|};
+    isDir: boolean,
+}
 
 @observer
 export class DirListItemName extends React.Component<PropsType> {

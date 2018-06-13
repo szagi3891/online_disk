@@ -1,7 +1,6 @@
-//@flow
 import { observable } from 'mobx';
 import { List as IList, OrderedMap } from 'immutable';
-import type { NodeItemType } from '../Type';
+import { NodeItemType } from '../Type';
 
 const getDir = (hash: string, path: IList<string>): Promise<OrderedMap<string, NodeItemType>> => {
     const param = {
@@ -14,6 +13,7 @@ const getDir = (hash: string, path: IList<string>): Promise<OrderedMap<string, N
         body: JSON.stringify(param)
     };
 
+    //@ts-ignore -- TODO
     return fetch('/api/dir/list', fetchParam)
         .then(response => response.json())
         .then(response => OrderedMap(response.files));
@@ -27,7 +27,7 @@ class BlobDirItem {
 
         getDir(hash, path).then(response => {
             this._value = response;
-        }).catch((error: mixed) => {
+        }).catch((error: any) => {
             console.error('Otrzymano błąd', error);
         });
     }
@@ -38,7 +38,7 @@ class BlobDirItem {
 }
 
 export class BlobDirStore {
-    +_data: Map<string, BlobDirItem>;
+    readonly _data: Map<string, BlobDirItem>;
 
     constructor() {
         this._data = new Map();

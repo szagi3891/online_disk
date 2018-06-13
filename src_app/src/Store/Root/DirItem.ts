@@ -1,8 +1,7 @@
-//@flow
 import { action, computed } from 'mobx';
 import { List as IList, OrderedMap } from 'immutable';
 import { BlobStore } from '../Blob/BlobStore';
-import type { CurrentHead, NodeItemType } from '../Type';
+import { CurrentHead, NodeItemType } from '../Type';
 import { FileItem } from './FileItem';
 import { HeadStore } from '../HeadStore';
 
@@ -89,12 +88,12 @@ const stringToArrayBuffer = (text: string): ArrayBuffer => {
 //TODO - fetch przyjmuje arrayBuffer
 
 export class DirItem {
-    +_parent: DirItem | null;
-    +_head: HeadStore;
-    +_blob: BlobStore;
-    +_hash: string;
-    +_path: IList<string>;
-    +_name: string;
+    readonly _parent: DirItem | null;
+    readonly _head: HeadStore;
+    readonly _blob: BlobStore;
+    readonly _hash: string;
+    readonly _path: IList<string>;
+    readonly _name: string;
 
     constructor(parent: DirItem | null, head: HeadStore, blob: BlobStore, hash: string, path: IList<string>, name: string) {
         this._parent = parent;

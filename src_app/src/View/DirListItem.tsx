@@ -1,8 +1,7 @@
-//@flow
-
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import glamorous from 'glamorous';
+import styled from 'react-emotion';
+//@ts-ignore TODO
 import rgba from 'hex-rgba';
 import { Store } from '../Store';
 import { DirItem } from '../Store/Root/DirItem';
@@ -11,36 +10,36 @@ import { DirListItemName } from './DirListItemName';
 
 const backgroundColor = '#e0e0e0';
 
-const Main = glamorous.div({
-    display: 'flex',
-    justifyContent: 'space-between',
-    paddingLeft: '5px',
-    paddingRight: '5px',
-    cursor: 'pointer',
-    backgroundColor: backgroundColor,
-    marginBottom: '3px',
-    border: '1px solid transparent',
+const Main = styled('div')`
+    display: flex;
+    justifyContent: space-between;
+    paddingLeft: 5px;
+    paddingRight: 5px;
+    cursor: pointer;
+    backgroundColor: ${backgroundColor};
+    marginBottom: 3px;
+    border: 1px solid transparent;
     ':hover': {
-        border: '1px solid blue',
-        backgroundColor: rgba(backgroundColor, 50)
+        border: 1px solid blue;
+        backgroundColor: rgba(${backgroundColor}, 50);
     }
-});
+`;
 
-const OptionDiv = glamorous.div({
+const OptionDiv = styled('div')`
     ':hover': {
-        color: 'blue'
+        color: blue;
     }
-});
+`;
 
-type PropsType = {|
+interface PropsType {
     store: Store,
     name: string | null,
     node: DirItem | FileItem
-|};
+}
 
 @observer
 export class DirListItem extends React.Component<PropsType> {
-    render(): React.Node {
+    render() {
         const { name, node } = this.props;
         const isDir = node instanceof DirItem;
 
@@ -68,7 +67,7 @@ export class DirListItem extends React.Component<PropsType> {
         store.path.goTo(node.path);
     }
 
-    _onDelete = (event: SyntheticEvent<>) => {
+    _onDelete = (event: React.SyntheticEvent) => {
         event.stopPropagation();
         console.info('Kasuję element', this.props.name);
     }

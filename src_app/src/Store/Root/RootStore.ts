@@ -1,4 +1,3 @@
-//@flow
 import { computed } from 'mobx';
 import { List as IList } from 'immutable';
 import { HeadStore } from '../HeadStore';
@@ -32,15 +31,15 @@ const findItemDir = (parent: DirItem, currentPath: IList<string>): [IList<DirIte
     return [IList(), null];
 };
 
-type CurrentPathNodesType = {|
+interface CurrentPathNodesType {
     path: IList<DirItem>,
     last: null | FileItem
-|};
+}
 
 export class RootStore {
-    +_head: HeadStore;
-    +_path: PathStore;
-    +_blob: BlobStore;
+    private readonly _head: HeadStore;
+    private readonly _path: PathStore;
+    private readonly _blob: BlobStore;
 
     constructor(head: HeadStore, path: PathStore) {
         this._head = head;

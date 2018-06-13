@@ -23,6 +23,7 @@ use serde_json;
 use serde::{Serialize, Deserialize};
 
 
+                                                        //TODO - sprawdzić czy Errorem może być dowolny typ
 type ResponseFuture = Box<Future<Item=Response<Body>, Error=hyper::Error> + Send>;
 
 

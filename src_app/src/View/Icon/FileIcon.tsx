@@ -1,9 +1,8 @@
-//@flow
 import * as React from 'react';
 
-type PropsType = {|
+interface PropsType {
     className: string,
-|};
+}
 
 export class FileIcon extends React.Component<PropsType> {
     render() {

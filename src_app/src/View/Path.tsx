@@ -1,24 +1,22 @@
-//@flow
-
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import glamorous from 'glamorous';
+import styled from 'react-emotion';
 import { Store } from '../Store';
 import { PathItem } from './PathItem';
 
-const Main = glamorous.div({
-    display: 'flex'
-});
+const Main = styled('div')`
+    display: flex;
+`;
 
-type PropsType = {|
+interface PropsType {
     store: Store,
     className: string
-|};
+}
 
 @observer
 export class Path extends React.Component<PropsType> {
 
-    render(): React.Node {
+    render() {
         const { store, className } = this.props;
         const currentPathNodes = store.root.currentPathNodes;
 

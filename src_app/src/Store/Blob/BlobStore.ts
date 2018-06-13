@@ -1,11 +1,9 @@
-//@flow
-
 import { List as IList, OrderedMap } from 'immutable';
 import { BlobDirStore } from './BlobDirStore';
-import type { NodeItemType } from '../Type';
+import { NodeItemType } from '../Type';
 
 export class BlobStore {
-    +_dirStore: BlobDirStore;
+    readonly _dirStore: BlobDirStore;
 
     constructor() {
         this._dirStore = new BlobDirStore();

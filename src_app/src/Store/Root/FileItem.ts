@@ -1,15 +1,13 @@
-//@flow
-
 import { List as IList } from 'immutable';
 import { BlobStore } from '../Blob/BlobStore';
 import { HeadStore } from '../HeadStore';
 
 export class FileItem {
-    +_head: HeadStore;
-    +_blob: BlobStore
-    +_hash: string;
-    +_path: IList<string>;
-    +_name: string;         //Nazwa pliku. Jego rozszerzenie określa zawartość
+    readonly _head: HeadStore;
+    readonly _blob: BlobStore
+    readonly _hash: string;
+    readonly _path: IList<string>;
+    readonly _name: string;         //Nazwa pliku. Jego rozszerzenie określa zawartość
 
     constructor(head: HeadStore, blob: BlobStore, hash: string, path: IList<string>, name: string) {
         this._head = head;

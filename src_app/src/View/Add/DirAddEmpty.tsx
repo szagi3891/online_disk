@@ -1,15 +1,13 @@
-//@flow
-
 import * as React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { Store } from '../../Store';
 import { DirItem } from '../../Store/Root/DirItem';
 
-type PropsType = {|
+interface PropsType {
     store: Store,
     dirItem: DirItem
-|};
+}
 
 @observer
 export class DirAddEmpty extends React.Component<PropsType> {
@@ -21,7 +19,7 @@ export class DirAddEmpty extends React.Component<PropsType> {
         this.input_folder = '';
     }
 
-    render(): React.Node {
+    render() {
         return (
             <div>
                 <input value={this.input_folder} onChange={this._onChangeInput} />
@@ -30,7 +28,7 @@ export class DirAddEmpty extends React.Component<PropsType> {
         );
     }
 
-    _onChangeInput = (event: SyntheticEvent<>) => {
+    _onChangeInput = (event: React.SyntheticEvent) => {
         const { target } = event;
         if (target instanceof HTMLInputElement) {
             this.input_folder = target.value;
@@ -43,7 +41,7 @@ export class DirAddEmpty extends React.Component<PropsType> {
         console.info('Zaczynam dodawać', this.input_folder);
         dirItem.addDir(this.input_folder).then(() => {
             console.info('Koniec dodawania');
-        }).catch((error: mixed) => {
+        }).catch((error: any) => {
             console.error('Otrzymano błąd', error);
         });
 

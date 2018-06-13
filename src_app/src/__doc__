@@ -42,7 +42,6 @@ https://parceljs.org/code_splitting.html
 
   test_import.js
 
-  //@flow
 export const render = (arg: string) => {
     console.info('REnder exec', arg);
 };

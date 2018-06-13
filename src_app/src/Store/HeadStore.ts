@@ -1,6 +1,5 @@
-//@flow
 import { action, observable } from 'mobx';
-import type { CurrentHead } from './Type';
+import { CurrentHead } from './Type';
 
 const getHead = (): Promise<CurrentHead> => {
     return fetch('/api/head')
@@ -18,7 +17,7 @@ export class HeadStore {
         getHead().then((head: CurrentHead) => {
             console.info('Otrzymany head', head);
             this.saveHead(head);
-        }).catch((error: mixed) => {
+        }).catch((error: any) => {
             console.error('Otrzymano błąd', error);
         });
     }

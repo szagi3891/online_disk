@@ -1,10 +1,8 @@
-//@flow
-
 import * as React from 'react';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react';
-import { css } from 'glamor';
-import glamorous from 'glamorous';
+import { css } from 'emotion';
+import styled from 'react-emotion';
 
 import { Store } from '../Store';
 import { DirAddEmpty } from './Add/DirAddEmpty';
@@ -12,67 +10,67 @@ import { FileAddEmpty } from './Add/FileAddEmpty';
 import { DirList } from './DirList';
 import { Path } from './Path';
 import { convertDropEvent } from '../Utils/DropFiles';
-import type { OnDropEventType, DirType } from '../Utils/DropFiles';
+import { OnDropEventType, DirData } from '../Utils/DropFiles';
 
-const AppWrapper = glamorous.div({
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh'
-});
+const AppWrapper = styled('div')`
+    display: flex;
+    flexDirection: column;
+    minHeight: 100vh;
+`;
 
-const pathClassName = css({
-    borderBottom: '1px solid black',
-    padding: '5px'
-});
+const pathClassName = css`
+    borderBottom: 1px solid black;
+    padding: 5px;
+`;
 
-const MainContentWrapper = glamorous.div({
-    display: 'flex',
-    overflow: 'hidden',
-    flexGrow: '1'
-});
+const MainContentWrapper = styled('div')`
+    display: flex;
+    overflow: hidden;
+    flexGrow: 1;
+`;
 
-const dirListClassName = css({
-    flexGrow: '1',
-    maxWidth: '400px',
-    borderRight: '1px solid black'
-});
+const dirListClassName = css`
+    flexGrow: 1;
+    maxWidth: 400px;
+    borderRight: 1px solid black
+`;
 
-const ContentWrapper = glamorous.div({
-    flexGrow: '1',
-    flexShrink: '0',
-    padding: '5px'
-});
+const ContentWrapper = styled('div')`
+    flexGrow: 1;
+    flexShrink: 0;
+    padding: 5px;
+`;
 
-const OptionWrapper = glamorous.div({
-    display: 'flex',
-    justifyContent: 'center',
-    position: 'absolute',
-    width: '70px',
-    top: '0',
-    right: '0',
-    border: '1px solid black',
-    padding: '5px',
-    cursor: 'pointer',
-    backgroundColor: 'white',
+const OptionWrapper = styled('div')`
+    display: flex;
+    justifyContent: center;
+    position: absolute;
+    width: 70px;
+    top: 0;
+    right: 0;
+    border: 1px solid black;
+    padding: 5px;
+    cursor: pointer;
+    backgroundColor: white;
     ':hover': {
-        backgroundColor: '#e0e0e0'
+        backgroundColor: #e0e0e0;
     }
-});
+`;
 
-const OptionBody = glamorous.div({
-    borderBottom: '1px solid black',
-    padding: '5px'
-});
+const OptionBody = styled('div')`
+    borderBottom: 1px solid black;
+    padding: 5px;
+`;
 
-type PropsType = {|
+interface PropsType {
     store: Store,
-|};
+}
 
 @observer
 export class App extends React.Component<PropsType> {
-    @observable _showFlag: bool = false;
+    @observable _showFlag: boolean = false;
 
-    render(): React.Node {
+    render() {
         const { store } = this.props;
         return (
             <AppWrapper>
@@ -131,7 +129,7 @@ export class App extends React.Component<PropsType> {
         );
     }
 
-    _renderHead(): React.Node {
+    _renderHead() {
         const { store } = this.props;
         const head = store.head;
         if (head === null) {
@@ -143,7 +141,7 @@ export class App extends React.Component<PropsType> {
         );
     }
 
-    _renderContent(): React.Node {
+    _renderContent() {
         return (
             <ContentWrapper onDrop={this._onDrop}>
                 dasdas
@@ -159,7 +157,7 @@ export class App extends React.Component<PropsType> {
         this._showFlag = true;
     }
 
-    _renderOptionButton(): React.Node {
+    _renderOptionButton() {
         if (this._showFlag) {
             return (
                 <OptionWrapper>
@@ -189,9 +187,9 @@ export class App extends React.Component<PropsType> {
         return null;
     }
 
-    _showDir(name: string, dir: DirType) {
+    _showDir(name: string, dir: DirData) {
         console.group(name);
-        for (const [localName, value] of dir.entries()) {
+        for (const [localName, value] of dir.getMap().entries()) {
             if (value instanceof File) {
                 console.info(localName, value);
             } else {
@@ -204,10 +202,10 @@ export class App extends React.Component<PropsType> {
     _onDrop = (event: OnDropEventType) => {
         event.preventDefault();
 
-        convertDropEvent(event).then((result: DirType) => {
+        convertDropEvent(event).then((result: DirData) => {
             console.info('Drop result', result);
             this._showDir('.', result);
-        }).catch((error: mixed) => {
+        }).catch((error: any) => {
             console.info('error wrzucania ...', error);
         });
     }

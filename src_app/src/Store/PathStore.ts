@@ -1,4 +1,3 @@
-//@flow
 import { action, observable } from 'mobx';
 import { List as IList } from 'immutable';
 
@@ -13,7 +12,7 @@ export class PathStore {
         return this._path;
     }
 
-    hasCurrentSet(path: IList<string>): bool {
+    hasCurrentSet(path: IList<string>): boolean {
         return this._path.equals(path);
     }
 

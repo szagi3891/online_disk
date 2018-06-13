@@ -1,28 +1,37 @@
-//@flow
-/* globals Iterator */
-
-export type OnDropEventType = {|
+export interface OnDropEventType {
     dataTransfer: DataTransfer,
     preventDefault: () => void,
-|};
-
-export type DirType = Map<string, File | DirType>;
-
-type FileSystemEntry = {
-    +file: (resolve: ((file: File) => void)) => void,
-    +createReader: () => {
-        +readEntries: (resolve: ((list: Iterator<FileSystemEntry>) => void)) => void,
-    },
-    +isDirectory: bool,
-    +isFile: bool,
-    +name: string,
 };
 
-export const convertDropEvent = (event: OnDropEventType): Promise<DirType> => {
+export class DirData {
+    readonly children: Map<string, File | DirData>;
+
+    constructor(children: Map<string, File | DirData>) {
+        this.children = children;
+    }
+
+    getMap() {
+        return this.children;
+    }
+}
+
+interface FileSystemEntry {
+    readonly file: (resolve: ((file: File) => void)) => void,
+    createReader: () => {
+        readonly  readEntries: (resolve: ((list: Iterator<FileSystemEntry>) => void)) => void,
+    },
+    readonly isDirectory: boolean,
+    readonly isFile: boolean,
+    readonly name: string,
+};
+
+export const convertDropEvent = (event: OnDropEventType): Promise<DirData> => {
     const entryList: Array<FileSystemEntry> = [];
 
-    for (const item of event.dataTransfer.items) {
-        //$FlowFixMe
+    //for (const item of event.dataTransfer.items) {
+    const { items } = event.dataTransfer;
+    for (let index = 0; index < items.length; index++) {
+        const item = items[index];
         const entry = item.webkitGetAsEntry();
         entryList.push(entry);
     }
@@ -31,9 +40,9 @@ export const convertDropEvent = (event: OnDropEventType): Promise<DirType> => {
 };
 
 
-function convertFileSystemEntry(item: FileSystemEntry): Promise<File | DirType> {
+function convertFileSystemEntry(item: FileSystemEntry): Promise<File | DirData> {
     return new Promise(
-        (resolve: ((file: File | DirType) => void), reject: ((error: mixed) => void)) => {
+        (resolve: ((file: File | DirData) => void), reject: ((error: any) => void)) => {
             if (item.isFile) {
                 item.file(
                     (file: File) => {
@@ -47,13 +56,14 @@ function convertFileSystemEntry(item: FileSystemEntry): Promise<File | DirType> 
                 item.createReader().readEntries((entries: Iterator<FileSystemEntry>) => {
                     const entriesArray = [];
 
+                    //@ts-ignore TODO
                     for (const entriesItem of entries) {
                         entriesArray.push(entriesItem);
                     }
 
-                    convertFileSystemEntryList(entriesArray).then((dir: DirType) => {
+                    convertFileSystemEntryList(entriesArray).then((dir: DirData) => {
                         resolve(dir);
-                    }).catch((error: mixed) => {
+                    }).catch((error: any) => {
                         reject(error);
                     });
                 });
@@ -65,14 +75,14 @@ function convertFileSystemEntry(item: FileSystemEntry): Promise<File | DirType> 
     );
 }
 
-function convertFileSystemEntryList(items: Array<FileSystemEntry>): Promise<DirType> {
+function convertFileSystemEntryList(items: Array<FileSystemEntry>): Promise<DirData> {
     const outMap = new Map();
     const outPromises = [];
 
     for (const item of items) {
         const name = item.name;
-        outPromises.push(new Promise((resolve: (() => void), reject: ((error: mixed) => void)) => {
-            return convertFileSystemEntry(item).then((result: File | DirType) => {
+        outPromises.push(new Promise((resolve: (() => void), reject: ((error: any) => void)) => {
+            return convertFileSystemEntry(item).then((result: File | DirData) => {
                 if (outMap.has(name)) {
                     reject(Error(`Utils/DropFile:convertFileSystemEntryList -> Double name: ${name}`));
                 } else {
@@ -83,7 +93,7 @@ function convertFileSystemEntryList(items: Array<FileSystemEntry>): Promise<DirT
         }));
     }
 
-    return Promise.all(outPromises).then((): DirType => outMap);
+    return Promise.all(outPromises).then((): DirData => new DirData(outMap));
 }
 
 /*
