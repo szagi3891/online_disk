@@ -5,9 +5,10 @@
 		"strict": true,
 		"jsx": "react",
 		"sourceMap": true,
+		"lib": ["dom", "es6", "esnext"],
 		"experimentalDecorators": true,
 		"downlevelIteration": true,
-		"lib": ["dom", "es6", "esnext"],
-		"noUnusedLocals": true
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
 	}
 }
