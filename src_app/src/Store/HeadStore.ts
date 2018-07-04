@@ -1,5 +1,5 @@
 import { action, observable } from 'mobx';
-import { CurrentHead } from './Type';
+import { CurrentHead } from 'Store/Type';
 
 const getHead = (): Promise<CurrentHead> => {
     return fetch('/api/head')

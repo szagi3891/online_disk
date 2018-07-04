@@ -1,6 +1,6 @@
 import { observable } from 'mobx';
 import { List as IList, OrderedMap } from 'immutable';
-import { NodeItemType } from '../Type';
+import { NodeItemType } from 'Store/Type';
 
 const getDir = (hash: string, path: IList<string>): Promise<OrderedMap<string, NodeItemType>> => {
     const param = {

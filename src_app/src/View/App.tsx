@@ -4,46 +4,46 @@ import { observer } from 'mobx-react';
 import { css } from 'emotion';
 import styled from 'react-emotion';
 
-import { Store } from '../Store';
-import { DirAddEmpty } from './Add/DirAddEmpty';
-import { FileAddEmpty } from './Add/FileAddEmpty';
-import { DirList } from './DirList';
-import { Path } from './Path';
-import { convertDropEvent } from '../Utils/DropFiles';
-import { OnDropEventType, DirData } from '../Utils/DropFiles';
+import { Store } from 'Store';
+import { DirAddEmpty } from 'View/Add/DirAddEmpty';
+import { FileAddEmpty } from 'View/Add/FileAddEmpty';
+import { DirList } from 'View/DirList';
+import { Path } from 'View/Path';
+import { convertDropEvent } from 'Utils/DropFiles';
+import { OnDropEventType, DirData } from 'Utils/DropFiles';
 
 const AppWrapper = styled('div')`
     display: flex;
-    flexDirection: column;
-    minHeight: 100vh;
+    flex-direction: column;
+    min-height: 100vh;
 `;
 
 const pathClassName = css`
-    borderBottom: 1px solid black;
+    border-bottom: 1px solid black;
     padding: 5px;
 `;
 
 const MainContentWrapper = styled('div')`
     display: flex;
     overflow: hidden;
-    flexGrow: 1;
+    flex-grow: 1;
 `;
 
 const dirListClassName = css`
-    flexGrow: 1;
-    maxWidth: 400px;
-    borderRight: 1px solid black
+    flex-grow: 1;
+    max-width: 400px;
+    border-right: 1px solid black;
 `;
 
 const ContentWrapper = styled('div')`
-    flexGrow: 1;
-    flexShrink: 0;
+    flex-grow: 1;
+    flex-shrink: 0;
     padding: 5px;
 `;
 
 const OptionWrapper = styled('div')`
     display: flex;
-    justifyContent: center;
+    justify-content: center;
     position: absolute;
     width: 70px;
     top: 0;
@@ -51,14 +51,14 @@ const OptionWrapper = styled('div')`
     border: 1px solid black;
     padding: 5px;
     cursor: pointer;
-    backgroundColor: white;
-    ':hover': {
-        backgroundColor: #e0e0e0;
+    background-color: white;
+    &:hover {
+        background-color: #e0e0e0;
     }
 `;
 
 const OptionBody = styled('div')`
-    borderBottom: 1px solid black;
+    border-bottom: 1px solid black;
     padding: 5px;
 `;
 

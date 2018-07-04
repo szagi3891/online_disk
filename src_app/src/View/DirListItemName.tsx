@@ -2,22 +2,22 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import { css } from 'emotion';
 import styled from 'react-emotion';
-import { DirIcon } from './Icon/DirIcon';
-import { FileIcon } from './Icon/FileIcon';
+import { DirIcon } from 'View/Icon/DirIcon';
+import { FileIcon } from 'View/Icon/FileIcon';
 
 const Main = styled('div')`
     display: flex;
 `;
 
 const DivMain = styled('div')`
-    flexShrink: 0;
+    flex-shrink: 0;
 `;
 
 const dirClass = css`
-    flexShrink: 0;
+    flex-shrink: 0;
     width: 20px;
     height: 20px;
-    marginRight: 5px;
+    margin-right: 5px;
 `;
 
 const renderIcon = (isDir: boolean) => {

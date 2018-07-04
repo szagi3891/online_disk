@@ -1,10 +1,10 @@
 import { computed } from 'mobx';
 import { List as IList } from 'immutable';
-import { HeadStore } from '../HeadStore';
-import { BlobStore } from '../Blob/BlobStore';
-import { DirItem } from './DirItem';
-import { FileItem } from './FileItem';
-import { PathStore } from '../PathStore';
+import { HeadStore } from 'Store/HeadStore';
+import { BlobStore } from 'Store/Blob/BlobStore';
+import { DirItem } from 'Store/Root/DirItem';
+import { FileItem } from 'Store/Root/FileItem';
+import { PathStore } from 'Store/PathStore';
 
 const findItemDir = (parent: DirItem, currentPath: IList<string>): [IList<DirItem>, null | FileItem] => {
     const first = currentPath.first();

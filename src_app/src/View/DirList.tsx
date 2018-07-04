@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { Store } from '../Store';
-import { DirItem } from '../Store/Root/DirItem';
-import { DirListItem } from './DirListItem';
+import { Store } from 'Store';
+import { DirItem } from 'Store/Root/DirItem';
+import { DirListItem } from 'View/DirListItem';
 
 interface PropsType {
     className: string,

@@ -3,30 +3,30 @@ import { observer } from 'mobx-react';
 import styled from 'react-emotion';
 //@ts-ignore TODO
 import rgba from 'hex-rgba';
-import { Store } from '../Store';
-import { DirItem } from '../Store/Root/DirItem';
-import { FileItem } from '../Store/Root/FileItem';
-import { DirListItemName } from './DirListItemName';
+import { Store } from 'Store';
+import { DirItem } from 'Store/Root/DirItem';
+import { FileItem } from 'Store/Root/FileItem';
+import { DirListItemName } from 'View/DirListItemName';
 
 const backgroundColor = '#e0e0e0';
 
 const Main = styled('div')`
     display: flex;
-    justifyContent: space-between;
-    paddingLeft: 5px;
-    paddingRight: 5px;
+    justify-content: space-between;
+    padding-left: 5px;
+    padding-right: 5px;
     cursor: pointer;
-    backgroundColor: ${backgroundColor};
-    marginBottom: 3px;
+    background-color: ${backgroundColor};
+    margin-bottom: 3px;
     border: 1px solid transparent;
-    ':hover': {
+    &:hover {
         border: 1px solid blue;
-        backgroundColor: rgba(${backgroundColor}, 50);
+        background-color: rgba(${backgroundColor}, 50);
     }
 `;
 
 const OptionDiv = styled('div')`
-    ':hover': {
+    &:hover {
         color: blue;
     }
 `;

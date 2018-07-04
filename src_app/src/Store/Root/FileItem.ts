@@ -1,6 +1,6 @@
 import { List as IList } from 'immutable';
-import { BlobStore } from '../Blob/BlobStore';
-import { HeadStore } from '../HeadStore';
+import { BlobStore } from 'Store/Blob/BlobStore';
+import { HeadStore } from 'Store/HeadStore';
 
 export class FileItem {
     readonly _head: HeadStore;

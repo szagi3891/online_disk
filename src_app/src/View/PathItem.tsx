@@ -2,23 +2,23 @@ import * as React from 'react';
 import { List as IList } from 'immutable';
 import { observer } from 'mobx-react';
 import styled from 'react-emotion';
-import { Store } from '../Store';
+import { Store } from 'Store';
 //@ts-ignore TODO
 import rgba from 'hex-rgba';
-import { DirListItemName } from './DirListItemName';
+import { DirListItemName } from 'View/DirListItemName';
 
 const PathItemBox = styled('span')`
-    paddingRight: 5px;
+    padding-right: 5px;
 `;
 
 const PathItemNoActive = styled(PathItemBox)`
-    cursror: default;
+    cursor: default;
 `;
 
 const PathItemSpanClick = styled(PathItemBox)`
     cursor: pointer;
     color: ${rgba('#0000ff', 50)};
-    ':hover': {
+    &:hover: {
         color: ${rgba('#0000ff', 25)};
     }
 `;

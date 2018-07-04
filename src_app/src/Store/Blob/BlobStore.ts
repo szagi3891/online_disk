@@ -1,6 +1,6 @@
 import { List as IList, OrderedMap } from 'immutable';
-import { BlobDirStore } from './BlobDirStore';
-import { NodeItemType } from '../Type';
+import { BlobDirStore } from 'Store/Blob/BlobDirStore';
+import { NodeItemType } from 'Store/Type';
 
 export class BlobStore {
     readonly _dirStore: BlobDirStore;

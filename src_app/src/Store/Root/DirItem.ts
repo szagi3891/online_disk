@@ -1,9 +1,9 @@
 import { action, computed } from 'mobx';
 import { List as IList, OrderedMap } from 'immutable';
-import { BlobStore } from '../Blob/BlobStore';
-import { CurrentHead, NodeItemType } from '../Type';
-import { FileItem } from './FileItem';
-import { HeadStore } from '../HeadStore';
+import { BlobStore } from 'Store/Blob/BlobStore';
+import { CurrentHead, NodeItemType } from 'Store/Type';
+import { FileItem } from 'Store/Root/FileItem';
+import { HeadStore } from 'Store/HeadStore';
 
 const addDir = (node_hash: string, path: IList<string>, dir: string): Promise<CurrentHead> => {
     const param = {

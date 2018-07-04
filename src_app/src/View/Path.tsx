@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import styled from 'react-emotion';
-import { Store } from '../Store';
-import { PathItem } from './PathItem';
+import { Store } from 'Store';
+import { PathItem } from 'View/PathItem';
 
 const Main = styled('div')`
     display: flex;

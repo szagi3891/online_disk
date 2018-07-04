@@ -2,8 +2,8 @@ import 'isomorphic-fetch';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { Store } from './Store';
-import { App } from './View/App';
+import { Store } from 'Store';
+import { App } from 'View/App';
 
 const root = document.getElementById('root');
 
